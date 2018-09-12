@@ -4,18 +4,18 @@ This is a project for building swarm systems that lift heavy weights that an idi
 We aim to make our simulation as realistic as possible to give trained agents the ability to function in real world situations.
 
 ## Prerequisites
-####Windows:
+#### Windows:
 We use MinGW compiler
 ```
 None, all the binaries are included :) 
 If you dont trust me you can downlad them from glfw website yourself...
 ```
-####Ubuntu:
+#### Ubuntu:
 ```
 sudo apt update
 sudo apt install build-essential libglfw3 cmake cmake-curses-gui
 ```
-####OSX:
+#### OSX:
 Make sure you have homebrew installed
 ```
 brew install glfw cmake
