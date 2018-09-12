@@ -3,7 +3,7 @@ project(HiveEngineRender)
 
 set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fPIC")
+#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fPIC")
 set(CMAKE_C_STANDARD 11)
 
 set(SOURCES Camera.cc Camera.h TextRenderer.cc TextRenderer.h GLHandler.cc GLHandler.h ShaderLoader.cc ShaderLoader.h ShaderProgram.cc ShaderProgram.h opengl_settings.h LineRenderer.cc LineRenderer.h glad/glad.c glad/glad.h file_loader.cc file_loader.h)
