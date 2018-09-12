@@ -5,11 +5,12 @@ We aim to make our simulation as realistic as possible to give trained agents th
 
 ## Prerequisites
 #### Windows:
-We use MinGW compiler
-```
-None, all the binaries are included :) 
-If you dont trust me you can downlad them from glfw website yourself...
-```
+We use MinGW compiler  
+You need to download and put GLFW binaries into the glfw folder  
+You can find them here: https://www.glfw.org/download.html  
+Specifically you need to copy the folder named lib-mingw-w64 in glfw  
+cmake looks for ./glfw/lib-mingw-w64/libglfw3.a
+
 #### Ubuntu:
 ```
 sudo apt update
