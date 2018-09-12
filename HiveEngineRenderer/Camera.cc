@@ -118,3 +118,8 @@ void HiveEngineRenderer::Camera::get_user_input(GLFWwindow *window, bool print) 
     }
 
 }
+
+void HiveEngineRenderer::Camera::look_at(glm::vec3 point) {
+    //orientation = glm::dquat(glm::dvec3(0, 0, 0));
+    glm::dvec3 up = glm::dvec3(glm::row(glm::mat4_cast(get_orientation()), 1));
+}

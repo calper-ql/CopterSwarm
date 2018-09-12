@@ -8,6 +8,7 @@
 #include <vector>
 #include "../glm/glm.hpp"
 #include "Utilities.h"
+#include "../glm/gtc/quaternion.hpp"
 
 namespace HiveEngine {
     class Force {
@@ -27,7 +28,7 @@ namespace HiveEngine {
         float radius; // expressed in meters
 
         glm::vec3 velocity; // expressed in meters per second
-        glm::mat3 angular_velocity; // expressed in radians per second
+        glm::quat angular_velocity; // expressed in radians per second
 
         Entity* parent; // parent link
         std::vector<Entity*> children;
@@ -49,6 +50,8 @@ namespace HiveEngine {
         glm::vec3 get_position();
         void set_position(glm::vec3 position);
 
+        glm::quat get_angular_velocity();
+
         glm::mat3 calculate_rotation_matrix();
         glm::vec3 calculate_position();
 
@@ -57,6 +60,7 @@ namespace HiveEngine {
 
         virtual std::pair<glm::vec3, glm::vec3> step(); // pair -> (force, torque)
     };
+
 
 
 }

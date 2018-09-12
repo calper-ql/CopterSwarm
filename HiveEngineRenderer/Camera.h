@@ -47,6 +47,8 @@ namespace HiveEngineRenderer {
         glm::mat4 get_view();
 
         void get_user_input(GLFWwindow *window, bool print);
+
+        void look_at(glm::vec3 point);
     };
 }
 

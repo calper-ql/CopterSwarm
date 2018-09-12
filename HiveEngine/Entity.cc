@@ -13,7 +13,7 @@ namespace HiveEngine {
         this->parent = nullptr;
         this->velocity = glm::vec3(0.0, 0.0, 0.0);
         this->rotation_matrix = glm::mat3(1.0);
-        this->angular_velocity = glm::mat3(1.0);
+        this->angular_velocity = glm::quat(glm::vec3(0.0, 0.0, 0.0));
     }
 
     Entity::~Entity() {
@@ -96,12 +96,12 @@ namespace HiveEngine {
         auto total_mass = calculate_total_mass();
         auto I = (2.0/5.0) * total_mass * radius * radius;
         total_torque /= I;
-        auto a = generate_rotation_matrix('x', total_torque[0]);
-        a = generate_rotation_matrix('y', total_torque[1]) * a;
-        a = generate_rotation_matrix('z', total_torque[2]) * a;
 
-        angular_velocity = angular_velocity * a;
-        rotation_matrix = rotation_matrix * angular_velocity;
+        angular_velocity *= glm::angleAxis(total_torque[0], glm::vec3(1.0, 0.0, 0.0) * angular_velocity);
+        angular_velocity *= glm::angleAxis(total_torque[1], glm::vec3(0.0, 1.0, 0.0) * angular_velocity);
+        angular_velocity *= glm::angleAxis(total_torque[2], glm::vec3(0.0, 0.0, 1.0) * angular_velocity);
+
+        rotation_matrix = rotation_matrix * glm::mat3_cast(angular_velocity);
 
         if(parent) {
             parent->apply_force(position, total_force, false);
@@ -120,6 +120,10 @@ namespace HiveEngine {
 
     void Entity::set_position(glm::vec3 position) {
         this->position = position;
+    }
+
+    glm::quat Entity::get_angular_velocity() {
+        return angular_velocity;
     }
 
 
