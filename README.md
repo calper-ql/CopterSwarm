@@ -9,7 +9,7 @@ We use MinGW compiler
 You need to download and put GLFW binaries into the glfw folder  
 You can find them here: https://www.glfw.org/download.html  
 Specifically you need to copy the folder named lib-mingw-w64 in glfw  
-cmake looks for ./glfw/lib-mingw-w64/libglfw3.a
+cmake looks for (project-root)/glfw/lib-mingw-w64/libglfw3.a
 
 #### Ubuntu:
 ```
