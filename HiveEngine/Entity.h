@@ -53,8 +53,9 @@ namespace HiveEngine {
 
         void add_child(Entity* c);
 
-        glm::mat3 get_rotation_matrix();
+        glm::vec3 get_velocity();
 
+        glm::mat3 get_rotation_matrix();
         glm::quat get_angular_velocity();
         glm::vec3 get_total_angular_acceleration();
         glm::vec3 calculate_throw_acceleration(glm::vec3 relative_point, bool parent_supported);

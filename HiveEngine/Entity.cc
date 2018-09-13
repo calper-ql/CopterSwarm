@@ -149,6 +149,11 @@ namespace HiveEngine {
         c->parent = this;
     }
 
+    glm::vec3 Entity::get_velocity() {
+        if(parent) return parent->get_velocity();
+        return velocity;
+    }
+
 
     // FORCE CONSTRUCTOR
     Force::Force(const glm::vec3 &leverage, const glm::vec3 &force, bool is_relative) : leverage(leverage),

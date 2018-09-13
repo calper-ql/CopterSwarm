@@ -76,8 +76,8 @@ int main(int argc, char* argv[]){
 
     e2.apply_force(glm::vec3(0.0, 0.0, e2.get_radius()), glm::vec3(0.0, 0.001, 0.0), true);
     e2.apply_force(glm::vec3(0.0, 0.0, -e2.get_radius()), glm::vec3(0.0, -0.001, 0.0), true);
-    e2.apply_force(glm::vec3(0.0, 0.0, e2.get_radius()), glm::vec3(0.001, 0.0, 0.0), true);
-    e2.apply_force(glm::vec3(0.0, 0.0, -e2.get_radius()), glm::vec3(-0.001, 0.0, 0.0), true);
+    e2.apply_force(glm::vec3(0.0, 0.0, e2.get_radius()), glm::vec3(0.006, 0.0, 0.0), true);
+    e2.apply_force(glm::vec3(0.0, 0.0, -e2.get_radius()), glm::vec3(-0.006, 0.0, 0.0), true);
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]){
         std::vector<glm::vec3> local_line_colors;
 
         glm::vec3 relative_point(0.0, 0.0, 0.1);
-        auto throw_acc = e2.calculate_throw_acceleration(relative_point, true);
+        auto throw_acc = e2.calculate_throw_acceleration(relative_point, true) + e2.get_velocity();
         auto global_point = e2.calculate_position() + e2.calculate_rotation_matrix() * relative_point;
         local_lines.emplace_back(global_point);
         local_lines.emplace_back(global_point +  throw_acc * 1000.0);
