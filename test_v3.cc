@@ -74,16 +74,13 @@ int main(int argc, char* argv[]){
     e->apply_force(glm::vec3(0.0, 0.0, e->get_radius()), glm::vec3(0.0, 0.2, 0.0), true);
     e->apply_force(glm::vec3(0.0, 0.0, -e->get_radius()), glm::vec3(0.0, -0.2, 0.0), true);
 
-    e2->apply_force(glm::vec3(e2->get_radius(), 0.0, 0.0), glm::vec3(0.0, 0.0, 0.06), true);
-    e2->apply_force(glm::vec3(-e2->get_radius(), 0.0, 0.0), glm::vec3(0.0, 0.0, -0.06), true);
-    //e2->apply_force(glm::vec3(0.0, 0.0, e2->get_radius()), glm::vec3(0.06, 0.0, 0.0), true);
-    //e2->apply_force(glm::vec3(0.0, 0.0, -e2->get_radius()), glm::vec3(-0.06, 0.0, 0.0), true);
+    e2->apply_force(glm::vec3(0.0, 0.0, e2->get_radius()), glm::vec3(0.06, 0.0, 0.0), true);
+    e2->apply_force(glm::vec3(0.0, 0.0, -e2->get_radius()), glm::vec3(-0.06, 0.0, 0.0), true);
 
     std::vector<HiveEngine::Entity*> fragments;
     bool fragment_key_state = false;
 
     while (!glfwWindowShouldClose(window)) {
-
 
         camera.set_perspective(90, camera_perspective_ratio, 0.01, 1e5);
         auto view = camera.get_view();

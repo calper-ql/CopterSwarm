@@ -81,7 +81,7 @@ namespace HiveEngine {
         glm::vec3 total_torque;
         for (const auto &item : this->children) {
             auto k = item->step(steps_per_second);
-            total_torque -= k.second;
+            total_torque += k.second;
         }
 
         for(auto f: this->applied_forces){
