@@ -79,12 +79,15 @@ int main(int argc, char* argv[]){
     e.apply_force(glm::vec3(0.0, 0.0, 0.0), glm::vec3(-0.3, 0.0, 0.0), true);
 
     // Rotation test
-    // e should start rotating on x+ axis, slowly...
+    // e should start rotating on x+ axis, fast...
     // we use symmetrical force to prevent any other unnecessary moves
-    e.apply_force(glm::vec3(0.0, 0.0, e.get_radius()), glm::vec3(0.0, 0.02, 0.0), true);
-    e.apply_force(glm::vec3(0.0, 0.0, -e.get_radius()), glm::vec3(0.0, -0.02, 0.0), true);
+    e.apply_force(glm::vec3(0.0, 0.0, e.get_radius()), glm::vec3(0.0, 2, 0.0), true);
+    e.apply_force(glm::vec3(0.0, 0.0, -e.get_radius()), glm::vec3(0.0, -2, 0.0), true);
 
     while (!glfwWindowShouldClose(window)) {
+        // reverse the rotation slowly
+        e.apply_force(glm::vec3(0.0, 0.0, e.get_radius()), glm::vec3(0.0, -0.002, 0.0), true);
+        e.apply_force(glm::vec3(0.0, 0.0, -e.get_radius()), glm::vec3(0.0, 0.002, 0.0), true);
 
         camera.set_perspective(90, camera_perspective_ratio, 0.01, 1e5); // set new perspective 90 degrees, camera aspect, 0.01 as near, 1*10^5 as far
         auto view = camera.get_view(); // Get view matrix -> glm::mat4
@@ -113,6 +116,9 @@ int main(int argc, char* argv[]){
          * ] KEY = DECREASE ROTATION SPEED
          *********************************************/
 
+        // Follow the object and reset its position if it goes to left too much.
+        view = glm::translate(view, -e.get_position());
+        if(e.get_position().x < -80) e.set_position(glm::vec3(80.0, 0.0, 0.3));
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Clear the screen and paint it to given values. (RGBA)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clears the depth and color buffer, :| try and see what happens if you dont use it...
@@ -132,6 +138,10 @@ int main(int argc, char* argv[]){
                 text_scale,
                 text_scale*camera_perspective_ratio);
 
+        char_d = consolas.render("tot acc: " + HiveEngine::vec3_to_str(e.get_total_angular_acceleration()),
+                                 -1.0f, char_d, // notice char_d is used here and not above this line.
+                                 text_scale,
+                                 text_scale*camera_perspective_ratio);
 
         // Draw entity oritentation
         glLineWidth(4); // Makes the lines thiccker
@@ -146,6 +156,7 @@ int main(int argc, char* argv[]){
 
         glfwSwapBuffers(window); // Swap the screen with the new generated one
         glfwPollEvents(); // check things like keyboard presses and window resizing
+
 
     }
 

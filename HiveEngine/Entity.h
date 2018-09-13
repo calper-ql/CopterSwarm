@@ -29,6 +29,7 @@ namespace HiveEngine {
 
         glm::vec3 velocity; // expressed in meters per second
         glm::quat angular_velocity; // expressed in radians per second
+        glm::vec3 angular_acceleration_counter;
 
         Entity* parent; // parent link
         std::vector<Entity*> children;
@@ -50,7 +51,13 @@ namespace HiveEngine {
         glm::vec3 get_position();
         void set_position(glm::vec3 position);
 
+        void add_child(Entity* c);
+
+        glm::mat3 get_rotation_matrix();
+
         glm::quat get_angular_velocity();
+        glm::vec3 get_total_angular_acceleration();
+        glm::vec3 calculate_throw_acceleration(glm::vec3 relative_point, bool parent_supported);
 
         glm::mat3 calculate_rotation_matrix();
         glm::vec3 calculate_position();

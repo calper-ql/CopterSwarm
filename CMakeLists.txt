@@ -26,9 +26,13 @@ if (BUILD_WITH_GL)
     add_executable(test_v2 test_v2.cc)
     target_link_libraries(test_v2 HiveEngine HiveEngineRenderer)
 
+    add_executable(test_v3 test_v3.cc)
+    target_link_libraries(test_v3 HiveEngine HiveEngineRenderer)
+
     if (WIN32)
         #target_link_libraries(test_v2 ${CMAKE_CURRENT_SOURCE_DIR}/glfw/lib-mingw-w64/libglfw3dll.a)
         target_link_libraries(test_v2 ${CMAKE_CURRENT_SOURCE_DIR}/glfw/lib-mingw-w64/libglfw3.a)
+        target_link_libraries(test_v3 ${CMAKE_CURRENT_SOURCE_DIR}/glfw/lib-mingw-w64/libglfw3.a)
     endif ()
 endif ()
 

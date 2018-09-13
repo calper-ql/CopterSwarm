@@ -14,6 +14,7 @@ namespace HiveEngine {
         this->velocity = glm::vec3(0.0, 0.0, 0.0);
         this->rotation_matrix = glm::mat3(1.0);
         this->angular_velocity = glm::quat(glm::vec3(0.0, 0.0, 0.0));
+        this->angular_acceleration_counter = glm::vec3(0.0, 0.0, 0.0);
     }
 
     Entity::~Entity() {
@@ -94,12 +95,13 @@ namespace HiveEngine {
         }
 
         auto total_mass = calculate_total_mass();
-        auto I = (2.0/5.0) * total_mass * radius * radius;
-        total_torque /= I;
+        auto I = (2.0f/5.0f) * total_mass * radius * radius;
+        auto total_w = total_torque / I;
 
-        angular_velocity *= glm::angleAxis(total_torque[0], glm::vec3(1.0, 0.0, 0.0) * angular_velocity);
-        angular_velocity *= glm::angleAxis(total_torque[1], glm::vec3(0.0, 1.0, 0.0) * angular_velocity);
-        angular_velocity *= glm::angleAxis(total_torque[2], glm::vec3(0.0, 0.0, 1.0) * angular_velocity);
+        angular_acceleration_counter += total_w;
+        angular_velocity *= glm::angleAxis(total_w[0], glm::vec3(1.0, 0.0, 0.0) * angular_velocity);
+        angular_velocity *= glm::angleAxis(total_w[1], glm::vec3(0.0, 1.0, 0.0) * angular_velocity);
+        angular_velocity *= glm::angleAxis(total_w[2], glm::vec3(0.0, 0.0, 1.0) * angular_velocity);
 
         rotation_matrix = rotation_matrix * glm::mat3_cast(angular_velocity);
 
@@ -124,6 +126,27 @@ namespace HiveEngine {
 
     glm::quat Entity::get_angular_velocity() {
         return angular_velocity;
+    }
+
+    glm::vec3 Entity::get_total_angular_acceleration() {
+        return angular_acceleration_counter;
+    }
+
+    glm::vec3 Entity::calculate_throw_acceleration(glm::vec3 relative_point, bool parent_supported) {
+        if(parent && parent_supported){
+            return parent->calculate_throw_acceleration(position, true)
+            + calculate_rotation_matrix() * glm::cross(get_total_angular_acceleration(), relative_point);
+        }
+        return calculate_rotation_matrix() * glm::cross(get_total_angular_acceleration(), relative_point);
+    }
+
+    glm::mat3 Entity::get_rotation_matrix() {
+        return rotation_matrix;
+    }
+
+    void Entity::add_child(Entity *c) {
+        children.push_back(c);
+        c->parent = this;
     }
 
 
