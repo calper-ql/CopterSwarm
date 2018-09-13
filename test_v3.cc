@@ -69,15 +69,18 @@ int main(int argc, char* argv[]){
     auto e2 = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 0.4), 0.1, 10.0);
     e->add_child(e2);
 
-    e->apply_force(glm::vec3(0.0, 0.0, 0.0), glm::vec3(-0.3, 0.0, 0.0), true);
+    e->apply_force(glm::vec3(0.0, 0.0, 0.0), glm::vec3(-9, 0.0, 0.0), true);
 
-    e->apply_force(glm::vec3(0.0, 0.0, e->get_radius()), glm::vec3(0.0, 0.02, 0.0), true);
-    e->apply_force(glm::vec3(0.0, 0.0, -e->get_radius()), glm::vec3(0.0, -0.02, 0.0), true);
+    e->apply_force(glm::vec3(0.0, 0.0, e->get_radius()), glm::vec3(0.0, 0.2, 0.0), true);
+    e->apply_force(glm::vec3(0.0, 0.0, -e->get_radius()), glm::vec3(0.0, -0.2, 0.0), true);
 
-    e2->apply_force(glm::vec3(0.0, 0.0, e2->get_radius()), glm::vec3(0.0, 0.001, 0.0), true);
-    e2->apply_force(glm::vec3(0.0, 0.0, -e2->get_radius()), glm::vec3(0.0, -0.001, 0.0), true);
-    e2->apply_force(glm::vec3(0.0, 0.0, e2->get_radius()), glm::vec3(0.006, 0.0, 0.0), true);
-    e2->apply_force(glm::vec3(0.0, 0.0, -e2->get_radius()), glm::vec3(-0.006, 0.0, 0.0), true);
+    e2->apply_force(glm::vec3(e2->get_radius(), 0.0, 0.0), glm::vec3(0.0, 0.0, 0.06), true);
+    e2->apply_force(glm::vec3(-e2->get_radius(), 0.0, 0.0), glm::vec3(0.0, 0.0, -0.06), true);
+    //e2->apply_force(glm::vec3(0.0, 0.0, e2->get_radius()), glm::vec3(0.06, 0.0, 0.0), true);
+    //e2->apply_force(glm::vec3(0.0, 0.0, -e2->get_radius()), glm::vec3(-0.06, 0.0, 0.0), true);
+
+    std::vector<HiveEngine::Entity*> fragments;
+    bool fragment_key_state = false;
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -114,7 +117,7 @@ int main(int argc, char* argv[]){
         ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
         glLineWidth(1);
 
-        e->step();
+        e->step(30);
 
         std::vector<glm::vec3> local_lines;
         std::vector<glm::vec3> local_line_colors;
@@ -123,7 +126,7 @@ int main(int argc, char* argv[]){
         auto throw_acc = e2->calculate_throw_acceleration(relative_point, true) + e2->get_velocity();
         auto global_point = e2->calculate_position() + e2->calculate_rotation_matrix() * relative_point;
         local_lines.emplace_back(global_point);
-        local_lines.emplace_back(global_point +  throw_acc * 1000.0);
+        local_lines.emplace_back(global_point +  throw_acc);
         local_line_colors.emplace_back(1.0, 1.0, 1.0);
         local_line_colors.emplace_back(1.0, 0.0, 0.0);
         ld->draw(local_lines.data(), local_line_colors.data(), local_lines.size() / 2, view);
@@ -132,6 +135,23 @@ int main(int argc, char* argv[]){
                                  -1.0f, char_d,
                                  text_scale,
                                  text_scale*camera_perspective_ratio);
+
+        if(glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS){
+            if(fragment_key_state == false){
+                fragment_key_state = true;
+                auto frag = new HiveEngine::Entity(global_point, 0.01, 0.01);
+                frag->set_velocity(throw_acc);
+                fragments.push_back(frag);
+            }
+        } else {
+            fragment_key_state = false;
+        }
+
+        for (const auto &fragment : fragments) {
+            fragment->step(30);
+            line_pair = HiveEngine::generate_entity_line_description(fragment, glm::vec3(1.0, 1.0, 1.0));
+            ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();

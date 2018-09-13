@@ -75,11 +75,12 @@ namespace HiveEngine {
         this->radius = radius;
     }
 
-    std::pair<glm::vec3, glm::vec3> Entity::step() {
+    std::pair<glm::vec3, glm::vec3> Entity::step(unsigned steps_per_second) {
+        float deamplify_ratio = 1.0f / (float)steps_per_second;
         glm::vec3 total_force;
         glm::vec3 total_torque;
         for (const auto &item : this->children) {
-            auto k = item->step();
+            auto k = item->step(steps_per_second);
             total_torque -= k.second;
         }
 
@@ -99,9 +100,9 @@ namespace HiveEngine {
         auto total_w = total_torque / I;
 
         angular_acceleration_counter += total_w;
-        angular_velocity *= glm::angleAxis(total_w[0], glm::vec3(1.0, 0.0, 0.0) * angular_velocity);
-        angular_velocity *= glm::angleAxis(total_w[1], glm::vec3(0.0, 1.0, 0.0) * angular_velocity);
-        angular_velocity *= glm::angleAxis(total_w[2], glm::vec3(0.0, 0.0, 1.0) * angular_velocity);
+        angular_velocity *= glm::angleAxis(total_w[0] * deamplify_ratio, glm::vec3(1.0, 0.0, 0.0) * angular_velocity);
+        angular_velocity *= glm::angleAxis(total_w[1] * deamplify_ratio, glm::vec3(0.0, 1.0, 0.0) * angular_velocity);
+        angular_velocity *= glm::angleAxis(total_w[2] * deamplify_ratio, glm::vec3(0.0, 0.0, 1.0) * angular_velocity);
 
         rotation_matrix = rotation_matrix * glm::mat3_cast(angular_velocity);
 
@@ -109,7 +110,7 @@ namespace HiveEngine {
             parent->apply_force(position, total_force, false);
         } else {
             velocity += (total_force / total_mass);
-            position += velocity;
+            position += deamplify_ratio * velocity;
         }
 
         applied_forces.clear();
@@ -152,6 +153,10 @@ namespace HiveEngine {
     glm::vec3 Entity::get_velocity() {
         if(parent) return parent->get_velocity();
         return velocity;
+    }
+
+    void Entity::set_velocity(glm::vec3 velocity) {
+        this->velocity = velocity;
     }
 
 

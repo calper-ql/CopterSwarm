@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
         // Calculate entity for 1 iteration;
         // This function is virtual, so you can implement your own entity.
         // If you want movement behaviour make sure to call the super version.
-        e.step();
+        e.step(30);
     }
 
     std::cout << "--  END  --" << std::endl;

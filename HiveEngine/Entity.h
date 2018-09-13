@@ -54,6 +54,7 @@ namespace HiveEngine {
         void add_child(Entity* c);
 
         glm::vec3 get_velocity();
+        void set_velocity(glm::vec3 velocity);
 
         glm::mat3 get_rotation_matrix();
         glm::quat get_angular_velocity();
@@ -63,10 +64,10 @@ namespace HiveEngine {
         glm::mat3 calculate_rotation_matrix();
         glm::vec3 calculate_position();
 
-        void apply_force(glm::vec3 leverage, glm::vec3 force, bool is_relative);
+        virtual void apply_force(glm::vec3 leverage, glm::vec3 force, bool is_relative);
         std::vector<Force> get_applied_forces();
 
-        virtual std::pair<glm::vec3, glm::vec3> step(); // pair -> (force, torque)
+        virtual std::pair<glm::vec3, glm::vec3> step(unsigned steps_per_second); // pair -> (force, torque)
     };
 
 
