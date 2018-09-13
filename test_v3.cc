@@ -66,18 +66,18 @@ int main(int argc, char* argv[]){
     consolas.init();
 
     HiveEngine::Entity e(glm::vec3(6.0, 0.0, 0.3), 0.5, 100.0);
-    HiveEngine::Entity e2(glm::vec3(0.0, 0.0, 0.4), 0.1, 10.0);
-    e.add_child(&e2);
+    auto e2 = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 0.4), 0.1, 10.0);
+    e.add_child(e2);
 
     e.apply_force(glm::vec3(0.0, 0.0, 0.0), glm::vec3(-0.3, 0.0, 0.0), true);
 
     e.apply_force(glm::vec3(0.0, 0.0, e.get_radius()), glm::vec3(0.0, 0.02, 0.0), true);
     e.apply_force(glm::vec3(0.0, 0.0, -e.get_radius()), glm::vec3(0.0, -0.02, 0.0), true);
 
-    e2.apply_force(glm::vec3(0.0, 0.0, e2.get_radius()), glm::vec3(0.0, 0.001, 0.0), true);
-    e2.apply_force(glm::vec3(0.0, 0.0, -e2.get_radius()), glm::vec3(0.0, -0.001, 0.0), true);
-    e2.apply_force(glm::vec3(0.0, 0.0, e2.get_radius()), glm::vec3(0.006, 0.0, 0.0), true);
-    e2.apply_force(glm::vec3(0.0, 0.0, -e2.get_radius()), glm::vec3(-0.006, 0.0, 0.0), true);
+    e2->apply_force(glm::vec3(0.0, 0.0, e2->get_radius()), glm::vec3(0.0, 0.001, 0.0), true);
+    e2->apply_force(glm::vec3(0.0, 0.0, -e2->get_radius()), glm::vec3(0.0, -0.001, 0.0), true);
+    e2->apply_force(glm::vec3(0.0, 0.0, e2->get_radius()), glm::vec3(0.006, 0.0, 0.0), true);
+    e2->apply_force(glm::vec3(0.0, 0.0, -e2->get_radius()), glm::vec3(-0.006, 0.0, 0.0), true);
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]){
         glLineWidth(1);
 
         glLineWidth(2);
-        line_pair = HiveEngine::generate_entity_line_description(&e2, glm::vec3(1.0, 1.0, 1.0));
+        line_pair = HiveEngine::generate_entity_line_description(e2, glm::vec3(1.0, 1.0, 1.0));
         ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
         glLineWidth(1);
 
@@ -120,8 +120,8 @@ int main(int argc, char* argv[]){
         std::vector<glm::vec3> local_line_colors;
 
         glm::vec3 relative_point(0.0, 0.0, 0.1);
-        auto throw_acc = e2.calculate_throw_acceleration(relative_point, true) + e2.get_velocity();
-        auto global_point = e2.calculate_position() + e2.calculate_rotation_matrix() * relative_point;
+        auto throw_acc = e2->calculate_throw_acceleration(relative_point, true) + e2->get_velocity();
+        auto global_point = e2->calculate_position() + e2->calculate_rotation_matrix() * relative_point;
         local_lines.emplace_back(global_point);
         local_lines.emplace_back(global_point +  throw_acc * 1000.0);
         local_line_colors.emplace_back(1.0, 1.0, 1.0);
