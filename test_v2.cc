@@ -11,7 +11,7 @@
 #include "HiveEngineRenderer/Camera.h"
 #include "HiveEngineRenderer/LineRenderer.h"
 
-#include "HiveEngine/Entity.h"
+#include "HiveEngine/Entity_Deprecated.h"
 #include "HiveEngine/Utilities.h"
 
 float camera_perspective_ratio = 1.0;
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]){
     consolas.init(); // Same thing with line renderer
 
     // Creating an entity
-    HiveEngine::Entity e(glm::vec3(6.0, 0.0, 0.3), 0.5, 100.0);
+    HiveEngine::Entity_Deprecated e(glm::vec3(6.0, 0.0, 0.3), 0.5, 100.0);
 
     // Movement test
     // e should start going left and continue, slowly...

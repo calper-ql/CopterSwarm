@@ -1,11 +1,12 @@
 //
-// Created by calper on 9/11/2018.
+// Created by calpe on 9/15/2018.
 //
 
 #include "Entity.h"
-#include <iostream>
+#include "Utilities.h"
 
 namespace HiveEngine {
+
     Entity::Entity(glm::vec3 position, float radius, float mass) {
         this->position = position;
         this->radius = radius;
@@ -13,14 +14,139 @@ namespace HiveEngine {
         this->parent = nullptr;
         this->velocity = glm::vec3(0.0, 0.0, 0.0);
         this->rotation_matrix = glm::mat3(1.0);
-        this->angular_velocity = glm::quat(glm::vec3(0.0, 0.0, 0.0));
-        this->angular_acceleration_counter = glm::vec3(0.0, 0.0, 0.0);
+        this->total_torque_counter = glm::vec3(0.0, 0.0, 0.0);
+        this->moment_of_inertia = glm::mat3(2.0f/5.0f * mass * radius * radius);
+        this->calculated_moment_of_inertia = this->moment_of_inertia;
     }
 
-    Entity::~Entity() {
-        for(auto c: this->children){
-            delete c;
+    /* ========= GETTERS & SETTERS =========  */
+
+    const glm::vec3 &Entity::get_position() const {
+        return position;
+    }
+
+    void Entity::set_position(const glm::vec3 &position) {
+        Entity::position = position;
+    }
+
+    const glm::vec3 &Entity::get_velocity() const {
+        if(parent) return parent->get_velocity();
+        return velocity;
+    }
+
+    void Entity::set_velocity(const glm::vec3 &velocity) {
+        Entity::velocity = velocity;
+    }
+
+    float Entity::get_mass() const {
+        return mass;
+    }
+
+    void Entity::set_mass(float mass) {
+        Entity::mass = mass;
+    }
+
+    const glm::mat3 &Entity::get_rotation_matrix() const {
+        return rotation_matrix;
+    }
+
+    void Entity::set_rotation_matrix(const glm::mat3 &rotation_matrix) {
+        Entity::rotation_matrix = rotation_matrix;
+    }
+
+    const glm::mat3 &Entity::get_moment_of_inertia() const {
+        return moment_of_inertia;
+    }
+
+    void Entity::set_moment_of_inertia(const glm::mat3 &moment_of_inertia) {
+        Entity::moment_of_inertia = moment_of_inertia;
+    }
+
+    float Entity::get_radius() const {
+        return radius;
+    }
+
+    void Entity::set_radius(float radius) {
+        Entity::radius = radius;
+    }
+
+    Entity *Entity::get_parent() const {
+        return parent;
+    }
+
+    void Entity::set_parent(Entity *parent) {
+        Entity::parent = parent;
+    }
+
+    const std::vector<Force> &Entity::get_applied_forces() const {
+        return applied_forces;
+    }
+
+    const EntityStepOutput &Entity::get_last_eso() const {
+        return last_eso;
+    }
+
+    void Entity::set_last_eso(const EntityStepOutput &last_eso) {
+        Entity::last_eso = last_eso;
+    }
+
+    /* ========= FUNCTIONS =========  */
+
+    EntityStepOutput Entity::step(unsigned steps_per_second) {
+        float deamplify_ratio = 1.0f / (float)steps_per_second;
+        EntityStepOutput eso;
+        eso.mass = mass;
+
+        for (auto child: children) {
+            auto cso = child->step(steps_per_second);
+            eso.torque += cso.torque;
+            auto s_vec = rotation_matrix * child->position * child->mass;
+            eso.mass += cso.mass;
+
+            glm::mat3 child_moi = glm::mat3(1.0);
+            auto c_pos = child->get_position();
+            c_pos *= c_pos;
+            child_moi[0][0] = child->mass * (c_pos.y + c_pos.z);
+            child_moi[1][1] = child->mass * (c_pos.x + c_pos.z);
+            child_moi[2][2] = child->mass * (c_pos.x + c_pos.y);
+            eso.moment_of_inertia *= cso.moment_of_inertia + child_moi;
         }
+
+        for(auto f: this->applied_forces){
+            glm::vec3 force_vector = f.force;
+            glm::vec3 leverage = this->rotation_matrix * f.leverage;
+            if(f.is_relative){
+                force_vector = this->rotation_matrix * f.force;
+            }
+            glm::vec3 torque_vector = glm::cross(leverage, force_vector);
+            eso.force += force_vector;
+            eso.torque += torque_vector;
+        }
+
+        total_torque_counter += eso.torque;
+        auto total_w = total_torque_counter / eso.moment_of_inertia;
+        calculated_moment_of_inertia = eso.moment_of_inertia;
+
+        auto angular_velocity = glm::mat3(1.0f);
+        angular_velocity *= generate_rotation_matrix('x', total_w[0] * deamplify_ratio);
+        angular_velocity *= generate_rotation_matrix('y', total_w[1] * deamplify_ratio);
+        angular_velocity *= generate_rotation_matrix('z', total_w[2] * deamplify_ratio);
+
+        last_eso = eso;
+
+        if(parent) {
+            parent->apply_force(position, eso.force, false);
+            rotation_matrix = rotation_matrix * angular_velocity;
+        } else {
+
+            velocity += (eso.force / eso.mass);
+            position += deamplify_ratio * velocity;
+            rotation_matrix = rotation_matrix * angular_velocity;
+        }
+
+        applied_forces.clear();
+
+        return eso;
     }
 
     float Entity::calculate_total_mass() {
@@ -31,27 +157,9 @@ namespace HiveEngine {
         return m;
     }
 
-    float Entity::calculate_total_radius() {
-        float r = this->radius;
-        for (const auto &item : this->children) {
-            float c_r = item->calculate_total_radius(this->position);
-            if(c_r > r) r = c_r;
-        }
-        return r;
-    }
-
-    float Entity::calculate_total_radius(glm::vec3 origin) {
-        float max_distance = glm::distance(origin, position) + this->radius;
-        for (const auto &item : this->children) {
-            float c_r = item->calculate_total_radius(this->position);
-            if(c_r > max_distance) max_distance = c_r;
-        }
-        return max_distance;
-    }
-
-    glm::vec3 Entity::calculate_position() {
-        if(parent == nullptr) return position;
-        return parent->calculate_position() + parent->rotation_matrix * position;
+    void Entity::add_child(Entity *c) {
+        children.push_back(c);
+        c->parent = this;
     }
 
     glm::mat3 Entity::calculate_rotation_matrix() {
@@ -59,112 +167,54 @@ namespace HiveEngine {
         return parent->calculate_rotation_matrix() * rotation_matrix;
     }
 
+    glm::vec3 Entity::calculate_throw_vector(glm::vec3 relative_point, bool parent_supported) {
+        if(parent && parent_supported){
+            return parent->calculate_throw_vector(position, true)
+                   + calculate_rotation_matrix()
+                   * glm::cross(total_torque_counter/calculated_moment_of_inertia, relative_point);
+        }
+        return calculate_rotation_matrix()
+        * glm::cross(total_torque_counter/calculated_moment_of_inertia, relative_point);
+    }
+
+    glm::vec3 Entity::calculate_relative_position() {
+        if(parent == nullptr) return glm::vec3(0.0f, 0.0f, 0.0f);
+        return parent->calculate_relative_position() + parent->rotation_matrix * position;
+    }
+
+    glm::vec3 Entity::calculate_position() {
+        if(parent == nullptr){
+            auto cm = calculate_central_mass();
+            return position - cm.position;
+        }
+        return parent->calculate_position() + parent->rotation_matrix * position;
+    }
+
     void Entity::apply_force(glm::vec3 leverage, glm::vec3 force, bool is_relative) {
         applied_forces.emplace_back(leverage, force, is_relative);
     }
 
-    std::vector<Force> Entity::get_applied_forces() {
-        return applied_forces;
-    }
-
-    float Entity::get_radius() {
-        return radius;
-    }
-
-    void Entity::set_radius(float radius) {
-        this->radius = radius;
-    }
-
-    std::pair<glm::vec3, glm::vec3> Entity::step(unsigned steps_per_second) {
-        float deamplify_ratio = 1.0f / (float)steps_per_second;
-        glm::vec3 total_force;
-        glm::vec3 total_torque;
-        for (const auto &item : this->children) {
-            auto k = item->step(steps_per_second);
-            total_torque += k.second;
+    void Entity::get_all_children(std::vector<Entity *> *list) {
+        for (Entity* item : children) {
+            list->push_back(item);
+            item->get_all_children(list);
         }
+    }
 
-        for(auto f: this->applied_forces){
-            glm::vec3 force_vector = f.force;
-            glm::vec3 leverage = this->rotation_matrix * f.leverage;
-            if(f.is_relative){
-                force_vector = this->rotation_matrix * f.force;
+    CentralMass Entity::calculate_central_mass() {
+        CentralMass cm;
+        std::vector<Entity*> list;
+        get_all_children(&list);
+        cm.mass = mass;
+        for(auto c: list){
+            if(c) {
+                cm.position += c->calculate_relative_position() * c->mass;
+                cm.mass += c->mass;
             }
-            glm::vec3 torque_vector = glm::cross(leverage, force_vector);
-            total_force += force_vector;
-            total_torque += torque_vector;
         }
-
-        auto total_mass = calculate_total_mass();
-        auto I = (2.0f/5.0f) * total_mass * radius * radius;
-        auto total_w = total_torque / I;
-
-        angular_acceleration_counter += total_w;
-        angular_velocity *= glm::angleAxis(total_w[0] * deamplify_ratio, glm::vec3(1.0, 0.0, 0.0) * angular_velocity);
-        angular_velocity *= glm::angleAxis(total_w[1] * deamplify_ratio, glm::vec3(0.0, 1.0, 0.0) * angular_velocity);
-        angular_velocity *= glm::angleAxis(total_w[2] * deamplify_ratio, glm::vec3(0.0, 0.0, 1.0) * angular_velocity);
-
-        rotation_matrix = rotation_matrix * glm::mat3_cast(angular_velocity);
-
-        if(parent) {
-            parent->apply_force(position, total_force, false);
-        } else {
-            velocity += (total_force / total_mass);
-            position += deamplify_ratio * velocity;
-        }
-
-        applied_forces.clear();
-        return {total_force, total_torque};
+        cm.position /= cm.mass;
+        return cm;
     }
-
-    glm::vec3 Entity::get_position() {
-        return position;
-    }
-
-    void Entity::set_position(glm::vec3 position) {
-        this->position = position;
-    }
-
-    glm::quat Entity::get_angular_velocity() {
-        return angular_velocity;
-    }
-
-    glm::vec3 Entity::get_total_angular_acceleration() {
-        return angular_acceleration_counter;
-    }
-
-    glm::vec3 Entity::calculate_throw_acceleration(glm::vec3 relative_point, bool parent_supported) {
-        if(parent && parent_supported){
-            return parent->calculate_throw_acceleration(position, true)
-            + calculate_rotation_matrix() * glm::cross(get_total_angular_acceleration(), relative_point);
-        }
-        return calculate_rotation_matrix() * glm::cross(get_total_angular_acceleration(), relative_point);
-    }
-
-    glm::mat3 Entity::get_rotation_matrix() {
-        return rotation_matrix;
-    }
-
-    void Entity::add_child(Entity *c) {
-        children.push_back(c);
-        c->parent = this;
-    }
-
-    glm::vec3 Entity::get_velocity() {
-        if(parent) return parent->get_velocity();
-        return velocity;
-    }
-
-    void Entity::set_velocity(glm::vec3 velocity) {
-        this->velocity = velocity;
-    }
-
-
-    // FORCE CONSTRUCTOR
-    Force::Force(const glm::vec3 &leverage, const glm::vec3 &force, bool is_relative) : leverage(leverage),
-                                                                                        force(force),
-                                                                                        is_relative(is_relative) {}
 
 
 }
-

@@ -1,5 +1,5 @@
 //
-// Created by calper on 9/11/2018.
+// Created by calpe on 9/15/2018.
 //
 
 #ifndef HIVEENGINE_ENTITY_H
@@ -7,71 +7,99 @@
 
 #include <vector>
 #include "../glm/glm.hpp"
-#include "Utilities.h"
 #include "../glm/gtc/quaternion.hpp"
+#include "../glm/gtc/matrix_transform.hpp"
+
+#include "CommonStructs.h"
 
 namespace HiveEngine {
-    class Force {
-    public:
-        glm::vec3 leverage;
-        glm::vec3 force;
-        bool is_relative;
-
-        Force(const glm::vec3 &leverage, const glm::vec3 &force, bool is_relative);
-    };
-
     class Entity {
     private:
         glm::vec3 position; // expressed in meters
-        glm::mat3 rotation_matrix; // expressed in radians
+        glm::vec3 velocity; // expressed in meters per second
         float mass; // expressed in kilograms
+
+        glm::mat3 rotation_matrix; // expressed in radians
+        glm::vec3 total_torque_counter; // expressed inn radians
+        glm::mat3 moment_of_inertia;
+
         float radius; // expressed in meters
 
-        glm::vec3 velocity; // expressed in meters per second
-        glm::quat angular_velocity; // expressed in radians per second
-        glm::vec3 angular_acceleration_counter;
+        glm::mat3 calculated_moment_of_inertia;
 
         Entity* parent; // parent link
         std::vector<Entity*> children;
 
         std::vector<Force> applied_forces;
 
-        float calculate_total_radius(glm::vec3 origin);
+        EntityStepOutput last_eso;
+
+        /* ========= Internal Functions =========  */
+        glm::vec3 calculate_relative_position();
 
     public:
         Entity(glm::vec3 position, float radius, float mass);
-        virtual ~Entity();
+
+
+
+        /* ========= Functions =========  */
+        virtual EntityStepOutput step(unsigned steps_per_second);
 
         float calculate_total_mass();
-        float calculate_total_radius();
-
-        float get_radius();
-        void set_radius(float radius);
-
-        glm::vec3 get_position();
-        void set_position(glm::vec3 position);
 
         void add_child(Entity* c);
 
-        glm::vec3 get_velocity();
-        void set_velocity(glm::vec3 velocity);
-
-        glm::mat3 get_rotation_matrix();
-        glm::quat get_angular_velocity();
-        glm::vec3 get_total_angular_acceleration();
-        glm::vec3 calculate_throw_acceleration(glm::vec3 relative_point, bool parent_supported);
-
         glm::mat3 calculate_rotation_matrix();
+
+        glm::vec3 calculate_throw_vector(glm::vec3 relative_point, bool parent_supported);
+
         glm::vec3 calculate_position();
 
         virtual void apply_force(glm::vec3 leverage, glm::vec3 force, bool is_relative);
-        std::vector<Force> get_applied_forces();
 
-        virtual std::pair<glm::vec3, glm::vec3> step(unsigned steps_per_second); // pair -> (force, torque)
+        void get_all_children(std::vector<Entity*> *list);
+
+        CentralMass calculate_central_mass();
+
+        /* ========= GETTERS & SETTERS =========  */
+
+        const glm::vec3 &get_position() const;
+
+        void set_position(const glm::vec3 &position);
+
+        const glm::vec3 &get_velocity() const;
+
+        void set_velocity(const glm::vec3 &velocity);
+
+        float get_mass() const;
+
+        void set_mass(float mass);
+
+        const glm::mat3 &get_rotation_matrix() const;
+
+        void set_rotation_matrix(const glm::mat3 &rotation_matrix);
+
+        const glm::mat3 &get_moment_of_inertia() const;
+
+        void set_moment_of_inertia(const glm::mat3 &moment_of_inertia);
+
+        float get_radius() const;
+
+        void set_radius(float radius);
+
+        Entity *get_parent() const;
+
+        void set_parent(Entity *parent);
+
+        const std::vector<Force> &get_applied_forces() const;
+
+        const EntityStepOutput &get_last_eso() const;
+
+        void set_last_eso(const EntityStepOutput &last_eso);
     };
-
 
 
 }
 
-#endif //DARKENGINE_ENTITY_H
+
+#endif //COPTERSWARM_ENTITY_H

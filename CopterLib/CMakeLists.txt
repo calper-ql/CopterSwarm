@@ -7,8 +7,8 @@ set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)
 
-set(SOURCES Rotor.h Rotor.cc)
+set(SOURCES Rotor.h Rotor.cc Motor.cc Motor.h EnergySource.cc EnergySource.h CommonStructs.h Copter.cc Copter.h)
 
-add_library(HiveEngine STATIC ${SOURCES})
-target_link_libraries(HiveEngine ${CMAKE_THREAD_LIBS_INIT})
+add_library(CopterLib STATIC ${SOURCES})
+target_link_libraries(CopterLib ${CMAKE_THREAD_LIBS_INIT})
 

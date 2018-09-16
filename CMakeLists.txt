@@ -5,12 +5,13 @@ set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)
 add_subdirectory(HiveEngine)
+add_subdirectory(CopterLib)
 
 message(STATUS "RELEASE FLAGS: " ${CMAKE_CXX_FLAGS_RELEASE})
 message(STATUS "DEBUG FLAGS: " ${CMAKE_CXX_FLAGS_DEBUG})
 
 add_executable(test_v1 test_v1.cc)
-target_link_libraries(test_v1 HiveEngine)
+target_link_libraries(test_v1 HiveEngine CopterLib)
 
 # ANY EXECUTABLE USING OPENGL SHOULD BE BUILT USING THIS CHECK STATEMENT
 option(BUILD_WITH_GL "Build the tests with OpenGL to visualize" ON)
@@ -24,15 +25,18 @@ if (BUILD_WITH_GL)
 
     # EXCECUTABLE EXAMPLE
     add_executable(test_v2 test_v2.cc)
-    target_link_libraries(test_v2 HiveEngine HiveEngineRenderer)
+    target_link_libraries(test_v2 HiveEngine HiveEngineRenderer CopterLib)
 
     add_executable(test_v3 test_v3.cc)
-    target_link_libraries(test_v3 HiveEngine HiveEngineRenderer)
+    target_link_libraries(test_v3 HiveEngine HiveEngineRenderer CopterLib)
+
+    add_executable(test_v4 test_v4.cc)
+    target_link_libraries(test_v4 HiveEngine HiveEngineRenderer CopterLib)
 
     if (WIN32)
-        #target_link_libraries(test_v2 ${CMAKE_CURRENT_SOURCE_DIR}/glfw/lib-mingw-w64/libglfw3dll.a)
         target_link_libraries(test_v2 ${CMAKE_CURRENT_SOURCE_DIR}/glfw/lib-mingw-w64/libglfw3.a)
         target_link_libraries(test_v3 ${CMAKE_CURRENT_SOURCE_DIR}/glfw/lib-mingw-w64/libglfw3.a)
+        target_link_libraries(test_v4 ${CMAKE_CURRENT_SOURCE_DIR}/glfw/lib-mingw-w64/libglfw3.a)
     endif ()
 endif ()
 

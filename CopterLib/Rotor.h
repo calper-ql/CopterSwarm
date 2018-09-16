@@ -5,16 +5,17 @@
 #ifndef COPTERSWARM_ROTOR_H
 #define COPTERSWARM_ROTOR_H
 
-#include "../HiveEngine/Entity.h"
+#include "../HiveEngine/Entity_Deprecated.h"
 
 namespace CopterLib {
-    class Rotor : public HiveEngine::Entity {
+    class Rotor : public HiveEngine::Entity_Deprecated {
     private:
-        float drag_to_lift_ratio;
+        float ld_ratio; // lift drag ratio
+        float drag_constant; // d = coef * density * vel_squared/2 * area,   drag_constant = coef * density * area
+        bool closed_rotor;
     public:
-        Rotor(float drag_to_lift_ratio, glm::vec3 pos, float radius, float mass);
-        virtual void apply_force(glm::vec3 leverage, glm::vec3 force, bool is_relative);
-        virtual void step();
+        Rotor(float ld_ratio, float drag_constant, bool closed_rotor, glm::vec3 pos, float radius, float mass);
+        virtual HiveEngine::EntityStepOutput step(unsigned steps_per_second);
     };
 }
 
