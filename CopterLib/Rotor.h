@@ -5,10 +5,10 @@
 #ifndef COPTERSWARM_ROTOR_H
 #define COPTERSWARM_ROTOR_H
 
-#include "../HiveEngine/Entity_Deprecated.h"
+#include "../HiveEngine/Entity.h"
 
 namespace CopterLib {
-    class Rotor : public HiveEngine::Entity_Deprecated {
+    class Rotor : public HiveEngine::Entity {
     private:
         float ld_ratio; // lift drag ratio
         float drag_constant; // d = coef * density * vel_squared/2 * area,   drag_constant = coef * density * area

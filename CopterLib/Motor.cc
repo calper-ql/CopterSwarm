@@ -5,9 +5,11 @@
 #include "Motor.h"
 #include "EnergySource.h"
 
+#include <iostream>
+
 namespace CopterLib {
 
-    Motor::Motor(float max_power_output, glm::vec3 pos, float radius, float mass) : Entity_Deprecated(pos, radius, mass) {
+    Motor::Motor(float max_power_output, glm::vec3 pos, float radius, float mass) : Entity(pos, radius, mass) {
         this->max_power_output = max_power_output;
         if(this->max_power_output < 0.0) this->max_power_output = 0.0;
         set_throttle(0.0);
@@ -19,12 +21,12 @@ namespace CopterLib {
         if(this->current_throttle > 1.0f) this->current_throttle = 1.0f;
     }
 
-    SymetricForce Motor::get_output(EnergySource *es) {
+    SymetricForce Motor::get_output(EnergySource *es, float de_amp) {
         SymetricForce sf;
         if(es == nullptr)
             return sf;
 
-        float acquired_energy = es->request_energy(this->max_power_output * abs(this->current_throttle));
+        float acquired_energy = es->request_energy(this->max_power_output * abs(this->current_throttle) * de_amp);
         /*  Angular kinetic energy - http://hyperphysics.phy-astr.gsu.edu/hbase/rke.html
          *  w = angular velocity
          *  ke = 1/2 * I * w^2
@@ -34,9 +36,10 @@ namespace CopterLib {
          *  W = Fd or W = T * theta where theta is the angular displacement
          */
 
+        //std::cout << acquired_energy << " " << this->max_power_output * abs(this->current_throttle) << std::endl;
 
-        sf.left.leverage.x = -1.0f;
-        sf.right.leverage.x = 1.0f;
+        sf.left.leverage.x = -0.01f;
+        sf.right.leverage.x = 0.01f;
         sf.left.is_relative = true;
         sf.right.is_relative = true;
 

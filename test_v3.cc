@@ -65,18 +65,20 @@ int main(int argc, char* argv[]){
     HiveEngineRenderer::TextRenderer consolas("GL_CODE/consolas");
     consolas.init();
 
-    auto e = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 2.0), 0.5, 10.0);
+    auto e = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 2.0), 0.1, 200.0);
     auto e2 = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 0.8), 0.1, 10.0);
-    auto e3 = new HiveEngine::Entity(glm::vec3(0.0, 0.0, -0.8), 0.1, 10.0);
+    //auto e3 = new HiveEngine::Entity(glm::vec3(0.0, 0.0, -0.8), 0.1, 10.0);
     auto e4 = new HiveEngine::Entity(glm::vec3(-0.8, 0.0, 0.0), 0.1, 100.0);
     e->add_child(e2);
-    e->add_child(e3);
+    //e->add_child(e3);
     e2->add_child(e4);
 
-    e->apply_force(e->get_position() + glm::vec3(0.0, 0.0, 0.0), glm::vec3(-9, 0.0, 0.0), true);
+    //e->apply_force(e->get_position() + glm::vec3(0.0, 0.0, 0.0), glm::vec3(-9, 0.0, 0.0), true);
 
     //e->apply_force(e->get_position() + glm::vec3(0.0, 0.0, e->get_radius()), glm::vec3(0.0, 8, 0.0), true);
     //e->apply_force(e->get_position() + glm::vec3(0.0, 0.0, -e->get_radius()), glm::vec3(0.0, -8, 0.0), true);
+
+    e2->apply_force(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.1, 0.0, 0.0), true);
 
     //e3->apply_force(glm::vec3(0.0, 0.0, e2->get_radius()), glm::vec3(60, 0.0, 0.0), true);
     //e3->apply_force(glm::vec3(0.0, 0.0, -e2->get_radius()), glm::vec3(-60, 0.0, 0.0), true);
@@ -86,10 +88,12 @@ int main(int argc, char* argv[]){
 
     fragments.push_back(e);
     fragments.push_back(e2);
-    fragments.push_back(e3);
+    //fragments.push_back(e3);
     fragments.push_back(e4);
 
     while (!glfwWindowShouldClose(window)) {
+
+        e4->apply_force(glm::vec3(0.0, 0.0, 0.0), glm::vec3(-0.1, 0.0, 0.0), false);
 
         camera.set_perspective(90, camera_perspective_ratio, 0.01, 1e5);
         auto view = camera.get_view();
@@ -152,11 +156,11 @@ int main(int argc, char* argv[]){
         }
 
         if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
-            e3->set_position(glm::vec3(0.0, 0.0, -0.8));
+            //e3->set_position(glm::vec3(0.0, 0.0, -0.8));
         }
 
         if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
-            e3->set_position(glm::vec3(0.0, 0.0, -0.4));
+            //e3->set_position(glm::vec3(0.0, 0.0, -0.4));
         }
 
         for (const auto &fragment : fragments) {

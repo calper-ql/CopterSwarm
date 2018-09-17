@@ -3,3 +3,9 @@
 //
 
 #include "PhysicalNode.h"
+
+namespace HiveEngine {
+
+
+
+}

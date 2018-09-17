@@ -5,10 +5,10 @@
 #ifndef COPTERSWARM_ENERGYSOURCE_H
 #define COPTERSWARM_ENERGYSOURCE_H
 
-#include "../HiveEngine/Entity_Deprecated.h"
+#include "../HiveEngine/Entity.h"
 
 namespace CopterLib {
-    class EnergySource : public HiveEngine::Entity_Deprecated {
+    class EnergySource : public HiveEngine::Entity {
     private:
         float energy;
         // expressed in joules -- https://en.wikipedia.org/wiki/Energy

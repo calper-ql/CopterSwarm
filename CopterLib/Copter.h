@@ -11,12 +11,10 @@
 #include <vector>
 
 namespace CopterLib {
-    class Copter : public HiveEngine::Entity_Deprecated {
+    class Copter : public HiveEngine::Entity {
     private:
         std::vector<std::pair<Motor*, Rotor*>> actuators;
         EnergySource* energy_source;
-        float core_mass;
-        void calculate_new_mass();
 
     public:
         Copter(glm::vec3 pos, float radius, float mass);

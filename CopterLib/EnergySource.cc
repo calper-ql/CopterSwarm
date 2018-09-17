@@ -8,10 +8,10 @@
 namespace CopterLib {
 
 
-    EnergySource::EnergySource(float energy, float max_capacity, glm::vec3 pos, float radius, float mass): Entity_Deprecated(pos, radius, mass) {
+    EnergySource::EnergySource(float energy, float max_capacity, glm::vec3 pos, float radius, float mass): Entity(pos, radius, mass) {
         this->energy = 0.0;
-        deposit_energy(energy);
         this->max_capacity = max_capacity;
+        deposit_energy(energy);
     }
 
     float EnergySource::request_energy(float amount) {

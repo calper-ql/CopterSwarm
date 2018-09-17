@@ -17,6 +17,7 @@ namespace HiveEngine {
         this->total_torque_counter = glm::vec3(0.0, 0.0, 0.0);
         this->moment_of_inertia = glm::mat3(2.0f/5.0f * mass * radius * radius);
         this->calculated_moment_of_inertia = this->moment_of_inertia;
+        this->torque_resistance = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 
     /* ========= GETTERS & SETTERS =========  */
@@ -95,6 +96,7 @@ namespace HiveEngine {
     EntityStepOutput Entity::step(unsigned steps_per_second) {
         float deamplify_ratio = 1.0f / (float)steps_per_second;
         EntityStepOutput eso;
+        eso.moment_of_inertia = moment_of_inertia;
         eso.mass = mass;
 
         for (auto child: children) {
@@ -109,7 +111,7 @@ namespace HiveEngine {
             child_moi[0][0] = child->mass * (c_pos.y + c_pos.z);
             child_moi[1][1] = child->mass * (c_pos.x + c_pos.z);
             child_moi[2][2] = child->mass * (c_pos.x + c_pos.y);
-            eso.moment_of_inertia *= cso.moment_of_inertia + child_moi;
+            eso.moment_of_inertia += child_moi + cso.moment_of_inertia;
         }
 
         for(auto f: this->applied_forces){
@@ -123,7 +125,12 @@ namespace HiveEngine {
             eso.torque += torque_vector;
         }
 
-        total_torque_counter += eso.torque;
+        if(parent){
+            total_torque_counter += eso.torque * glm::abs(torque_resistance - 1.0f);
+        } else {
+            total_torque_counter += eso.torque;
+        }
+
         auto total_w = total_torque_counter / eso.moment_of_inertia;
         calculated_moment_of_inertia = eso.moment_of_inertia;
 
@@ -135,7 +142,7 @@ namespace HiveEngine {
         last_eso = eso;
 
         if(parent) {
-            parent->apply_force(position, eso.force, false);
+            parent->apply_force(position, eso.force, true);
             rotation_matrix = rotation_matrix * angular_velocity;
         } else {
 
@@ -173,8 +180,7 @@ namespace HiveEngine {
                    + calculate_rotation_matrix()
                    * glm::cross(total_torque_counter/calculated_moment_of_inertia, relative_point);
         }
-        return calculate_rotation_matrix()
-        * glm::cross(total_torque_counter/calculated_moment_of_inertia, relative_point);
+        return glm::cross(total_torque_counter/calculated_moment_of_inertia, relative_point);
     }
 
     glm::vec3 Entity::calculate_relative_position() {
@@ -214,6 +220,10 @@ namespace HiveEngine {
         }
         cm.position /= cm.mass;
         return cm;
+    }
+
+    void Entity::set_torque_resistance(glm::vec3 percentages) {
+        this->torque_resistance = percentages;
     }
 
 

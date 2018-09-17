@@ -22,6 +22,7 @@ namespace HiveEngine {
         glm::mat3 rotation_matrix; // expressed in radians
         glm::vec3 total_torque_counter; // expressed inn radians
         glm::mat3 moment_of_inertia;
+        glm::vec3 torque_resistance;
 
         float radius; // expressed in meters
 
@@ -60,6 +61,8 @@ namespace HiveEngine {
         void get_all_children(std::vector<Entity*> *list);
 
         CentralMass calculate_central_mass();
+
+        void set_torque_resistance(glm::vec3 percentages);
 
         /* ========= GETTERS & SETTERS =========  */
 

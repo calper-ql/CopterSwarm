@@ -6,31 +6,31 @@
 
 namespace CopterLib {
 
-    Copter::Copter(glm::vec3 pos, float radius, float mass) : Entity_Deprecated(pos, radius, mass) {
-        this->core_mass = mass;
+    Copter::Copter(glm::vec3 pos, float radius, float mass) : Entity(pos, radius, mass) {
         this->energy_source = nullptr;
     }
 
     void Copter::add_actuator(std::pair<Motor *, Rotor *> actuator) {
         actuators.push_back(actuator);
-        add_child(actuator.second);
+        //add_child(actuator.second);
         add_child(actuator.first);
-        calculate_new_mass();
+        actuator.first->add_child(actuator.second);
     }
 
     void Copter::set_energy_source(EnergySource *energy_source) {
         this->energy_source = energy_source;
-        calculate_new_mass();
     }
 
     HiveEngine::EntityStepOutput Copter::step(unsigned steps_per_second) {
+        float deamplify_ratio = 1.0f / (float)steps_per_second;
         for(auto p: actuators){
-            auto sym_f = p.first->get_output(energy_source);
-            p.second->apply_force(sym_f.left.leverage, sym_f.left.force, sym_f.left.is_relative);
-            p.second->apply_force(sym_f.right.leverage, sym_f.right.force, sym_f.right.is_relative);
+            if(energy_source){
+                auto sym_f = p.first->get_output(energy_source, deamplify_ratio);
+                p.second->apply_force(sym_f.left.leverage, sym_f.left.force, sym_f.left.is_relative);
+                p.second->apply_force(sym_f.right.leverage, sym_f.right.force, sym_f.right.is_relative);
+            }
         }
-
-        return Entity_Deprecated::step(steps_per_second);
+        return Entity::step(steps_per_second);
     }
 
     bool Copter::set_throttle(std::vector<float> values) {
@@ -41,12 +41,4 @@ namespace CopterLib {
         return true;
     }
 
-    void Copter::calculate_new_mass() {
-        auto tm = core_mass;
-        for(auto p: actuators){
-            tm += p.first->get_mass();
-        }
-        if(energy_source) tm += energy_source->get_mass();
-        set_mass(tm);
-    }
 }
