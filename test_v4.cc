@@ -12,6 +12,7 @@
 #include "HiveEngineRenderer/LineRenderer.h"
 
 #include "CopterLib/Copter.h"
+#include "HiveEngine/Utilities.h"
 
 float camera_perspective_ratio = 1.0;
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -195,7 +196,7 @@ int main(int argc, char* argv[]){
 
         c->set_throttle({-pow+fov_mod, pow+left_mod, -pow+bck_mod, pow+right_mod});
 
-        for (const auto &fragment : fragments) {
+        for (auto fragment : fragments) {
             auto line_pair = HiveEngine::generate_entity_line_description(fragment, glm::vec3(1.0, 1.0, 0.1));
             ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
         }

@@ -36,6 +36,14 @@ namespace HiveEngine {
 
         CentralMass();
     };
+
+    class BBX {
+        // Bounding Box
+        glm::vec3 a;
+        glm::vec3 b;
+
+        BBX();
+    };
 }
 
 #endif //HIVEENGINE_COMMONSTRUCTS_H

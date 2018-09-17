@@ -193,7 +193,7 @@ namespace HiveEngine {
             auto cm = calculate_central_mass();
             return position - cm.position;
         }
-        return parent->calculate_position() + parent->rotation_matrix * position;
+        return parent->calculate_position() + parent->calculate_rotation_matrix() * position;
     }
 
     void Entity::apply_force(glm::vec3 leverage, glm::vec3 force, bool is_relative) {

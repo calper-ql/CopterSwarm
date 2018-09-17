@@ -4,7 +4,6 @@
 
 #include "Utilities.h"
 #include "Entity.h"
-#include "Entity_Deprecated.h"
 
 
 namespace HiveEngine {
@@ -36,38 +35,6 @@ namespace HiveEngine {
         }
 
         return mat;
-    }
-
-    std::pair<std::vector<glm::vec3>, std::vector<glm::vec3>> generate_entity_line_description(Entity_Deprecated* e, glm::vec3 scale) {
-        std::vector<glm::vec3> lines;
-        std::vector<glm::vec3> colors;
-
-        auto p = glm::vec3(0.0, 0.0, 0.0);
-
-        // Makes the left vector green
-        lines.emplace_back(p.x - e->get_radius()*scale.x, p.y, p.z);
-        lines.emplace_back(p.x + e->get_radius()*scale.x, p.y, p.z);
-        colors.emplace_back(0.0, 1.0, 0.0);
-        colors.emplace_back(1.0, 1.0, 1.0);
-
-        lines.emplace_back(p.x, p.y - e->get_radius()*scale.y, p.z);
-        lines.emplace_back(p.x, p.y + e->get_radius()*scale.y, p.z);
-        colors.emplace_back(1.0, 1.0, 1.0);
-        colors.emplace_back(1.0, 1.0, 1.0);
-
-        // Makes the up vector blue
-        lines.emplace_back(p.x , p.y, p.z - e->get_radius()*scale.z);
-        lines.emplace_back(p.x , p.y, p.z + e->get_radius()*scale.z);
-        colors.emplace_back(1.0, 1.0, 1.0);
-        colors.emplace_back(0.0, 0.0, 1.0);
-
-        auto rm = e->calculate_rotation_matrix();
-        for (size_t i = 0; i < lines.size(); ++i) {
-            lines[i] = rm * lines[i];
-            lines[i] = lines[i] + e->calculate_position();
-        }
-
-        return {lines, colors};
     }
 
     std::pair<std::vector<glm::vec3>, std::vector<glm::vec3>> generate_entity_line_description(Entity* e, glm::vec3 scale) {
@@ -143,15 +110,6 @@ namespace HiveEngine {
         str.append(std::to_string(value.z));
         str.append(")");
         return str;
-    }
-
-    void fill_entity_list(Entity_Deprecated *e, std::vector<Entity_Deprecated *> &list) {
-        if(e == nullptr)
-            return;
-        list.push_back(e);
-        for (auto item : e->get_children()) {
-            fill_entity_list(item, list);
-        }
     }
 
 }

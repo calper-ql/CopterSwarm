@@ -6,14 +6,14 @@
 
 #include <iostream>
 
-#include "HiveEngine/Entity_Deprecated.h"
+#include "HiveEngine/Entity.h"
 #include "HiveEngine/Utilities.h"
 
 int main(int argc, char* argv[]){
     std::cout << "-- START --" << std::endl;
 
     // Creating an entity
-    HiveEngine::Entity_Deprecated e(glm::vec3(6.0, 0.0, 0.3), 0.5, 100.0);
+    HiveEngine::Entity e(glm::vec3(6.0, 0.0, 0.3), 0.5, 100.0);
 
     // Movement test
     // e should start going left and continue, slowly...

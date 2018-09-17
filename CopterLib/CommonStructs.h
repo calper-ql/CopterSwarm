@@ -6,7 +6,7 @@
 #define COPTERSWARM_COMMONSTRUCTS_H
 
 #include "../glm/glm.hpp"
-#include "../HiveEngine/Entity_Deprecated.h"
+#include "../HiveEngine/CommonStructs.h"
 
 namespace CopterLib {
     struct SymetricForce {

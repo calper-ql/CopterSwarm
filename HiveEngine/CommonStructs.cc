@@ -28,4 +28,9 @@ namespace HiveEngine {
         position = glm::vec3(0.0f, 0.0f, 0.0f);
         mass = 0.0f;
     }
+
+    BBX::BBX() {
+        a = glm::vec3(0.0f, 0.0f, 0.0f);
+        b = glm::vec3(0.0f, 0.0f, 0.0f);
+    }
 }
