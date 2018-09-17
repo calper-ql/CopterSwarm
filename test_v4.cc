@@ -77,12 +77,22 @@ int main(int argc, char* argv[]){
     */
 
     CopterLib::Copter* c = new CopterLib::Copter(glm::vec3(0.0, 0.0, 1.0), 1.0, 1.0);
-    CopterLib::Motor* mlu = new CopterLib::Motor(1.01, glm::vec3(-1.0, 1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mll = new CopterLib::Motor(1.01, glm::vec3(-1.0, -1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mru = new CopterLib::Motor(1.01, glm::vec3(1.0, 1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mrl = new CopterLib::Motor(1.01, glm::vec3(1.0, -1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mlu = new CopterLib::Motor(300, glm::vec3(-1.0, 1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mll = new CopterLib::Motor(300, glm::vec3(-1.0, -1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mru = new CopterLib::Motor(300, glm::vec3(1.0, 1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mrl = new CopterLib::Motor(300, glm::vec3(1.0, -1.0, 0.0), 0.1, 0.1);
 
-    CopterLib::EnergySource* es = new CopterLib::EnergySource(3e4, 3e4, glm::vec3(0.0, 0.0, 0.1), 0.1, 0.1);
+	/* 		Energy stored in battery is Charge(C) * Voltage(V) = Energy(J)
+	 *		Also Current(A) * time(seconds) = Charge(C)
+	 *
+	 *		mA means 1/1000 Amp for an hour and hour has a 60x60 = 3600 seconds
+	 *
+	 *		1 mAh = 0.001 Amps * 3600 seconds = 3.6 Coulombs of charge
+	 *
+	 *		A 12 Volt battery with 3600 mAh has total of 3600*12*3.6 = Joules of energy ()
+	 * 
+	 */
+    CopterLib::EnergySource* es = new CopterLib::EnergySource(3600*12*3.6, 3600*12*3.6, glm::vec3(0.0, 0.0, 0.1), 0.1, 0.1);
 
     c->add_child(es);
     c->set_energy_source(es);
@@ -159,20 +169,31 @@ int main(int argc, char* argv[]){
 
         float fov_mod = 0.0;
         float bck_mod = 0.0;
+		float left_mod = 0.0;
+		float right_mod = 0.0;
         float pow = 0.0;
 
         if(glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
             pow = 0.99;
         }
         if(glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
-            fov_mod = 0.01;
+            fov_mod = 0.03;
         }
 
         if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
-            bck_mod = 0.01;
+            bck_mod = 0.03;
+        }
+		
+	  	if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
+            left_mod = 0.03;
         }
 
-        c->set_throttle({-pow+fov_mod, pow+fov_mod, -pow+bck_mod, pow+bck_mod});
+        if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
+            right_mod = 0.03;
+        }
+
+
+        c->set_throttle({-pow+fov_mod, pow+left_mod, -pow+bck_mod, pow+right_mod});
 
         for (const auto &fragment : fragments) {
             auto line_pair = HiveEngine::generate_entity_line_description(fragment, glm::vec3(1.0, 1.0, 0.1));

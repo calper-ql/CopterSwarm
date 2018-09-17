@@ -38,12 +38,12 @@ namespace CopterLib {
 
         //std::cout << acquired_energy << " " << this->max_power_output * abs(this->current_throttle) << std::endl;
 
-        sf.left.leverage.x = -1.0f;
-        sf.right.leverage.x = 1.0f;
+        sf.left.leverage.x = -0.05f;
+        sf.right.leverage.x = 0.05f;
         sf.left.is_relative = true;
         sf.right.is_relative = true;
 
-        auto w_half = sqrtf(2*acquired_energy) / 2.0f; // divided because of symmetry
+        auto w_half = sqrtf(2.0f * acquired_energy) / 2.0f; // divided because of symmetry
         if(this->current_throttle < 0.0) w_half *= -1.0f;
         sf.left.force.y = w_half;
         sf.right.force.y = -w_half;
