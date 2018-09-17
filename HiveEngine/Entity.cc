@@ -197,7 +197,7 @@ namespace HiveEngine {
     }
 
     void Entity::apply_force(glm::vec3 leverage, glm::vec3 force, bool is_relative) {
-        applied_forces.emplace_back(leverage, force, is_relative);
+        if(glm::length(force) > 0.0) applied_forces.emplace_back(leverage, force, is_relative);
     }
 
     void Entity::get_all_children(std::vector<Entity *> *list) {

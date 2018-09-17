@@ -28,6 +28,8 @@ namespace CopterLib {
         bool is_empty();
 
         float get_available_energy();
+
+        float get_capacity();
     };
 }
 

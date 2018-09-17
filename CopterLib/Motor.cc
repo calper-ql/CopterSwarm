@@ -38,8 +38,8 @@ namespace CopterLib {
 
         //std::cout << acquired_energy << " " << this->max_power_output * abs(this->current_throttle) << std::endl;
 
-        sf.left.leverage.x = -0.01f;
-        sf.right.leverage.x = 0.01f;
+        sf.left.leverage.x = -1.0f;
+        sf.right.leverage.x = 1.0f;
         sf.left.is_relative = true;
         sf.right.is_relative = true;
 

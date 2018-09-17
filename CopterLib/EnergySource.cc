@@ -44,4 +44,8 @@ namespace CopterLib {
     float EnergySource::get_available_energy() {
         return this->energy;
     }
+
+    float EnergySource::get_capacity() {
+        return max_capacity;
+    }
 }
