@@ -9,9 +9,10 @@
 #include "EnergySource.h"
 #include "Rotor.h"
 #include <vector>
+#include "Serializable.h"
 
 namespace CopterLib {
-    class Copter : public HiveEngine::Entity {
+    class Copter : public HiveEngine::Entity, public Serializable {
     private:
         std::vector<std::pair<Motor*, Rotor*>> actuators;
         EnergySource* energy_source;
@@ -22,6 +23,8 @@ namespace CopterLib {
         void set_energy_source(EnergySource* energy_source);
         virtual HiveEngine::EntityStepOutput step(unsigned steps_per_second);
         bool set_throttle(std::vector<float> values);
+
+        std::vector<char> serialize() override;
     };
 }
 

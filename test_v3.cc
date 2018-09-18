@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
         return 3;
     }
 
-    GLFWwindow *window = glfwCreateWindow(1000, 1000, "test_v2", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1000, 1000, "test_v3", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     if (HiveEngineRenderer::initGLAD()) {

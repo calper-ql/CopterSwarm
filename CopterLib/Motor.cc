@@ -9,10 +9,13 @@
 
 namespace CopterLib {
 
-    Motor::Motor(float max_power_output, glm::vec3 pos, float radius, float mass) : Entity(pos, radius, mass) {
+    Motor::Motor(float max_power_output, float efficiency, glm::vec3 pos, float radius, float mass) : Entity(pos, radius, mass) {
         this->max_power_output = max_power_output;
         if(this->max_power_output < 0.0) this->max_power_output = 0.0;
         set_throttle(0.0);
+        this->efficiency = efficiency;
+        if(this->efficiency < 0.0f) this->efficiency = 0.0f;
+        if(this->efficiency > 1.0f) this->efficiency = 1.0f;
     }
 
     void Motor::set_throttle(float throttle) {
@@ -38,17 +41,28 @@ namespace CopterLib {
 
         //std::cout << acquired_energy << " " << this->max_power_output * abs(this->current_throttle) << std::endl;
 
-        sf.left.leverage.x = -0.05f;
-        sf.right.leverage.x = 0.05f;
+        sf.left.leverage.x = -1.0f;
+        sf.right.leverage.x = 1.0f;
         sf.left.is_relative = true;
         sf.right.is_relative = true;
 
         auto w_half = sqrtf(2.0f * acquired_energy) / 2.0f; // divided because of symmetry
         if(this->current_throttle < 0.0) w_half *= -1.0f;
+        w_half *= efficiency;
         sf.left.force.y = w_half;
         sf.right.force.y = -w_half;
 
         return sf;
+    }
+
+    std::vector<char> Motor::serialize() {
+        std::vector<char> str = create_command_header("Motor");
+        str = add_float_to_command(str, max_power_output);
+        str = add_float_to_command(str, efficiency);
+        str = add_vec3_to_command(str, get_position());
+        str = add_float_to_command(str, get_radius());
+        str = add_float_to_command(str, get_mass());
+        return str;
     }
 
 }

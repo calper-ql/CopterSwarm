@@ -6,9 +6,10 @@
 #define COPTERSWARM_ENERGYSOURCE_H
 
 #include "../HiveEngine/Entity.h"
+#include "Serializable.h"
 
 namespace CopterLib {
-    class EnergySource : public HiveEngine::Entity {
+    class EnergySource : public HiveEngine::Entity, public Serializable {
     private:
         float energy;
         // expressed in joules -- https://en.wikipedia.org/wiki/Energy
@@ -30,6 +31,9 @@ namespace CopterLib {
         float get_available_energy();
 
         float get_capacity();
+
+        std::vector<char> serialize() override;
+
     };
 }
 

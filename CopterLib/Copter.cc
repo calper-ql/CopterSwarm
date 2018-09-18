@@ -41,4 +41,12 @@ namespace CopterLib {
         return true;
     }
 
+    std::vector<char> Copter::serialize() {
+        std::vector<char> str = create_command_header("Copter");
+        str = add_vec3_to_command(str, get_position());
+        str = add_float_to_command(str, get_radius());
+        str = add_float_to_command(str, get_mass());
+        return str;
+    }
+
 }

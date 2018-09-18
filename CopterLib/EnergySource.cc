@@ -48,4 +48,14 @@ namespace CopterLib {
     float EnergySource::get_capacity() {
         return max_capacity;
     }
+
+    std::vector<char> EnergySource::serialize() {
+        std::vector<char> str = create_command_header("EnergySource");
+        str = add_float_to_command(str, energy);
+        str = add_float_to_command(str, max_capacity);
+        str = add_vec3_to_command(str, get_position());
+        str = add_float_to_command(str, get_radius());
+        str = add_float_to_command(str, get_mass());
+        return str;
+    }
 }

@@ -13,6 +13,7 @@
 
 #include "CopterLib/Copter.h"
 #include "HiveEngine/Utilities.h"
+#include "CopterLib/Environment.h"
 
 float camera_perspective_ratio = 1.0;
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -27,7 +28,7 @@ int main(int argc, char* argv[]){
         return 3;
     }
 
-    GLFWwindow *window = glfwCreateWindow(1000, 1000, "test_v2", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1000, 1000, "test_v4", NULL, NULL);
     glfwMakeContextCurrent(window);
 
     if (HiveEngineRenderer::initGLAD()) {
@@ -77,11 +78,11 @@ int main(int argc, char* argv[]){
     rear_rotor->set_rotation_matrix(HiveEngine::generate_rotation_matrix('z', PI/2.0));
     */
 
-    CopterLib::Copter* c = new CopterLib::Copter(glm::vec3(0.0, 0.0, 1.0), 1.0, 1.0);
-    CopterLib::Motor* mlu = new CopterLib::Motor(300, glm::vec3(-1.0, 1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mll = new CopterLib::Motor(300, glm::vec3(-1.0, -1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mru = new CopterLib::Motor(300, glm::vec3(1.0, 1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mrl = new CopterLib::Motor(300, glm::vec3(1.0, -1.0, 0.0), 0.1, 0.1);
+    CopterLib::Copter* c = new CopterLib::Copter(glm::vec3(0.0, 0.0, 1.0), 1.0, 1.0123);
+    CopterLib::Motor* mlu = new CopterLib::Motor(300, 0.05, glm::vec3(-1.0, 1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mll = new CopterLib::Motor(300, 0.05, glm::vec3(-1.0, -1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mru = new CopterLib::Motor(300, 0.05, glm::vec3(1.0, 1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mrl = new CopterLib::Motor(300, 0.05, glm::vec3(1.0, -1.0, 0.0), 0.1, 0.1);
 
 	/* 		Energy stored in battery is Charge(C) * Voltage(V) = Energy(J)
 	 *		Also Current(A) * time(seconds) = Charge(C)
@@ -93,15 +94,15 @@ int main(int argc, char* argv[]){
 	 *		A 12 Volt battery with 3600 mAh has total of 3600*12*3.6 = Joules of energy ()
 	 * 
 	 */
-    CopterLib::EnergySource* es = new CopterLib::EnergySource(3600*12*3.6, 3600*12*3.6, glm::vec3(0.0, 0.0, 0.1), 0.1, 0.1);
+    CopterLib::EnergySource* es = new CopterLib::EnergySource(3600.0f*12.0f*3.6f, 3600.0f*12.0f*3.6f, glm::vec3(0.0, 0.0, 0.1), 0.1, 0.1);
 
     c->add_child(es);
     c->set_energy_source(es);
 
-    CopterLib::Rotor* rlu = new CopterLib::Rotor(4.0f, 1.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
-    CopterLib::Rotor* rll = new CopterLib::Rotor(4.0f, 1.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
-    CopterLib::Rotor* rru = new CopterLib::Rotor(4.0f, 1.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
-    CopterLib::Rotor* rrl = new CopterLib::Rotor(4.0f, 1.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
+    CopterLib::Rotor* rlu = new CopterLib::Rotor(4.0f, 0.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
+    CopterLib::Rotor* rll = new CopterLib::Rotor(4.0f, 0.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
+    CopterLib::Rotor* rru = new CopterLib::Rotor(4.0f, 0.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
+    CopterLib::Rotor* rrl = new CopterLib::Rotor(4.0f, 0.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
 
     c->add_actuator({mlu, rlu});
     c->add_actuator({mll, rll});
@@ -127,6 +128,21 @@ int main(int argc, char* argv[]){
     fragments.push_back(es);
 
     //c->set_throttle({-0.0, -0.0, 0.01, 0.0});
+
+    CopterLib::Environment env;
+    env.command(c->serialize());
+    env.command(es->serialize());
+
+    env.command(mlu->serialize());
+    env.command(mll->serialize());
+    env.command(mru->serialize());
+    env.command(mrl->serialize());
+
+    env.command(rlu->serialize());
+    env.command(rll->serialize());
+    env.command(rru->serialize());
+    env.command(rrl->serialize());
+
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -201,7 +217,6 @@ int main(int argc, char* argv[]){
             ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
         }
 
-
         std::vector<glm::vec3> local_lines;
         std::vector<glm::vec3> local_line_colors;
         glm::vec3 relative_point(0.0, 0.1, 0.0);
@@ -217,7 +232,6 @@ int main(int argc, char* argv[]){
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-
 
     }
 

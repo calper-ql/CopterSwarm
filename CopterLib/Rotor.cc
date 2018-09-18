@@ -5,6 +5,7 @@
 #include "Rotor.h"
 
 #include "../HiveEngine/Utilities.h"
+#include "Utilities.h"
 #include <iostream>
 
 namespace CopterLib {
@@ -43,4 +44,16 @@ namespace CopterLib {
 
         return Entity::step(steps_per_second);
     }
+
+    std::vector<char> Rotor::serialize() {
+        std::vector<char> str = create_command_header("Rotor");
+        str = add_float_to_command(str, ld_ratio);
+        str = add_float_to_command(str, drag_constant);
+        str = add_bool_to_command(str, closed_rotor);
+        str = add_vec3_to_command(str, get_position());
+        str = add_float_to_command(str, get_radius());
+        str = add_float_to_command(str, get_mass());
+        return str;
+    }
+
 }

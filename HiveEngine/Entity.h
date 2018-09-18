@@ -41,6 +41,7 @@ namespace HiveEngine {
     public:
         Entity(glm::vec3 position, float radius, float mass);
 
+        virtual ~Entity();
 
 
         /* ========= Functions =========  */
@@ -49,6 +50,8 @@ namespace HiveEngine {
         float calculate_total_mass();
 
         void add_child(Entity* c);
+
+        void erase_children_vector();
 
         glm::mat3 calculate_rotation_matrix();
 

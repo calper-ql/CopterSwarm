@@ -20,6 +20,12 @@ namespace HiveEngine {
         this->torque_resistance = glm::vec3(1.0f, 1.0f, 1.0f);
     }
 
+    Entity::~Entity() {
+        for (auto item : children) {
+            delete item;
+        }
+    }
+
     /* ========= GETTERS & SETTERS =========  */
 
     const glm::vec3 &Entity::get_position() const {
@@ -224,6 +230,10 @@ namespace HiveEngine {
 
     void Entity::set_torque_resistance(glm::vec3 percentages) {
         this->torque_resistance = percentages;
+    }
+
+    void Entity::erase_children_vector() {
+        children.clear();
     }
 
 
