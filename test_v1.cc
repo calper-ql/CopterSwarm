@@ -8,9 +8,13 @@
 
 #include "HiveEngine/Entity.h"
 #include "HiveEngine/Utilities.h"
+#include "CopterLib/Environment.h"
 
 int main(int argc, char* argv[]){
     std::cout << "-- START --" << std::endl;
+
+    CopterLib::Environment env;
+    env.command(std::vector<char>());
 
     // Creating an entity
     HiveEngine::Entity e(glm::vec3(6.0, 0.0, 0.3), 0.5, 100.0);

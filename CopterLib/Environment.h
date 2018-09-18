@@ -5,8 +5,13 @@
 #ifndef COPTERSWARM_ENVIRONMENT_H
 #define COPTERSWARM_ENVIRONMENT_H
 
-#include "Copter.h"
 #include <string>
+#include <iostream>
+
+#include "Copter.h"
+#include "../HiveEngine/Utilities.h"
+#include "../HiveEngine/Entity.h"
+#include "../HiveEngine/CommonStructs.h"
 
 namespace CopterLib {
 

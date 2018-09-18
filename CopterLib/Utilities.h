@@ -25,6 +25,7 @@ namespace CopterLib {
     glm::vec3 unpack_vec3(std::vector<char>& command);
     glm::mat3 unpack_mat3(std::vector<char>& command);
     bool unpack_bool(std::vector<char>& command);
+
 }
 
 

@@ -3,8 +3,6 @@
 //
 
 #include "Environment.h"
-#include <iostream>
-#include "../HiveEngine/Utilities.h"
 
 namespace CopterLib {
 

@@ -65,6 +65,7 @@ namespace CopterLib {
 
 
 
+
     /*
      *
      *                 UNPACK
@@ -113,6 +114,8 @@ namespace CopterLib {
         command.erase(command.begin(), command.begin() + sizeof(bool));
         return value;
     }
+
+
 
 
 }
