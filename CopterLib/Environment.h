@@ -23,6 +23,7 @@ namespace CopterLib {
         std::vector<Motor*> motors;
         std::vector<Rotor*> rotors;
         std::vector<EnergySource*> energy_sources;
+        std::vector<HiveEngine::Entity*> others;
 
         std::vector<HiveEngine::Entity*> entity_list;
 
@@ -35,6 +36,11 @@ namespace CopterLib {
         std::vector<char> construct_rotor(std::vector<char> str);
         std::vector<char> construct_energy_source(std::vector<char> str);
 
+        std::vector<char> get_pos(std::vector<char> str);
+        std::vector<char> run_step(std::vector<char> str);
+        std::vector<char> apply_gravity(std::vector<char> str);
+
+        std::vector<char> add_actuator(std::vector<char> str);
 
     };
 

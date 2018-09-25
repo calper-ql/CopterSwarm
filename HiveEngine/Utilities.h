@@ -9,6 +9,7 @@
 #include <cmath>
 #include <vector>
 #include <string>
+#include "mesh.h"
 
 namespace HiveEngine {
     class Entity;
@@ -16,6 +17,7 @@ namespace HiveEngine {
     std::pair<std::vector<glm::vec3>, std::vector<glm::vec3>> generate_entity_line_description(Entity* e, glm::vec3 scale); // generates lines for renderer, scales each dim, 0.0 -> 1.0
     std::pair<std::vector<glm::vec3>, std::vector<glm::vec3>> generate_target_line_description(glm::vec3 vec, float radius, glm::vec3 scale, glm::vec3 color);
     std::string vec3_to_str(glm::vec3 value);
+    void add_voxel_to_mesh(Mesh* m, glm::vec3 pos, float size, glm::vec4 color);
 }
 
 #endif //DARKENGINE_UTILITIES_H

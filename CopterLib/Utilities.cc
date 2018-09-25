@@ -87,7 +87,7 @@ namespace CopterLib {
 
     unsigned unpack_unsigned(std::vector<char> &command) {
         unsigned value = *(unsigned *)command.data();
-        command.erase(command.begin() + sizeof(unsigned));
+        command.erase(command.begin(), command.begin() + sizeof(unsigned));
         return value;
     }
 

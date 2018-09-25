@@ -2,6 +2,7 @@
 // Created by calpe on 9/15/2018.
 //
 
+#include <iostream>
 #include "Entity.h"
 #include "Utilities.h"
 
@@ -137,13 +138,13 @@ namespace HiveEngine {
             total_torque_counter += eso.torque;
         }
 
-        auto total_w = total_torque_counter / eso.moment_of_inertia;
+        auto total_w = total_torque_counter / eso.moment_of_inertia * deamplify_ratio;
         calculated_moment_of_inertia = eso.moment_of_inertia;
 
         auto angular_velocity = glm::mat3(1.0f);
-        angular_velocity *= generate_rotation_matrix('x', total_w[0] * deamplify_ratio);
-        angular_velocity *= generate_rotation_matrix('y', total_w[1] * deamplify_ratio);
-        angular_velocity *= generate_rotation_matrix('z', total_w[2] * deamplify_ratio);
+        angular_velocity *= generate_rotation_matrix('x', total_w[0]);
+        angular_velocity *= generate_rotation_matrix('y', total_w[1]);
+        angular_velocity *= generate_rotation_matrix('z', total_w[2]);
 
         last_eso = eso;
 
@@ -151,10 +152,23 @@ namespace HiveEngine {
             parent->apply_force(position, eso.force, true);
             rotation_matrix = rotation_matrix * angular_velocity;
         } else {
-
+            auto mc = calculate_central_mass();
             velocity += (eso.force / eso.mass);
             position += deamplify_ratio * velocity;
             rotation_matrix = rotation_matrix * angular_velocity;
+
+            glm::vec3 leverage = -mc.position;
+            glm::vec3 shift_vector = glm::cross(leverage, eso.force) / eso.moment_of_inertia;
+
+            auto angular_shift = glm::mat3(1.0f);
+            //angular_shift *= generate_rotation_matrix('x', shift_vector[0]);
+            //angular_shift *= generate_rotation_matrix('y', shift_vector[1]);
+            //angular_shift *= generate_rotation_matrix('z', shift_vector[2]);
+            angular_shift *= angular_velocity;
+
+            auto shift = (angular_shift * -mc.position) + mc.position;
+            position += shift;
+            eso.central_mass = shift;
         }
 
         applied_forces.clear();
@@ -196,8 +210,7 @@ namespace HiveEngine {
 
     glm::vec3 Entity::calculate_position() {
         if(parent == nullptr){
-            auto cm = calculate_central_mass();
-            return position - cm.position;
+            return position;
         }
         return parent->calculate_position() + parent->calculate_rotation_matrix() * position;
     }

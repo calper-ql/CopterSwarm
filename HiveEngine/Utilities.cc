@@ -4,6 +4,7 @@
 
 #include "Utilities.h"
 #include "Entity.h"
+#include "TriangleDescriptor.h"
 
 
 namespace HiveEngine {
@@ -110,6 +111,63 @@ namespace HiveEngine {
         str.append(std::to_string(value.z));
         str.append(")");
         return str;
+    }
+
+    void add_voxel_to_mesh(Mesh *m, glm::vec3 pos, float size, glm::vec4 color) {
+        auto luc = m->get_next_attrib();
+        auto luf = m->get_next_attrib();
+        auto ldc = m->get_next_attrib();
+        auto ldf = m->get_next_attrib();
+
+        auto ruc = m->get_next_attrib();
+        auto ruf = m->get_next_attrib();
+        auto rdc = m->get_next_attrib();
+        auto rdf = m->get_next_attrib();
+
+        m->vertices[luc] = glm::vec3(pos.x-size, pos.y+size, pos.z-size);
+        m->vertices[luf] = glm::vec3(pos.x-size, pos.y+size, pos.z+size);
+        m->vertices[ldc] = glm::vec3(pos.x-size, pos.y-size, pos.z-size);
+        m->vertices[ldf] = glm::vec3(pos.x-size, pos.y-size, pos.z+size);
+
+        m->vertices[ruc] = glm::vec3(pos.x+size, pos.y+size, pos.z-size);
+        m->vertices[ruf] = glm::vec3(pos.x+size, pos.y+size, pos.z+size);
+        m->vertices[rdc] = glm::vec3(pos.x+size, pos.y-size, pos.z-size);
+        m->vertices[rdf] = glm::vec3(pos.x+size, pos.y-size, pos.z+size);
+
+        m->colors[luc] = color;
+        m->colors[luf] = color;
+        m->colors[ldc] = color;
+        m->colors[ldf] = color;
+
+        m->colors[ruc] = color;
+        m->colors[ruf] = color;
+        m->colors[rdc] = color;
+        m->colors[rdf] = color;
+
+        auto left_1 = new HiveEngine::TriangleDescriptor(m, TI(ldf), TI(luf), TI(luc), 0, NO_PARENT);
+        auto left_2 = new HiveEngine::TriangleDescriptor(m, TI(luc), TI(ldc), TI(ldf), 0, NO_PARENT);
+        left_1->set_neighbor(left_2, LR);
+
+        auto up_1 = new HiveEngine::TriangleDescriptor(m, TI(luf), TI(ruf), TI(ruc), 0, NO_PARENT);
+        auto up_2 = new HiveEngine::TriangleDescriptor(m, TI(ruc), TI(luc), TI(luf), 0, NO_PARENT);
+        up_1->set_neighbor(up_2, LR);
+
+        auto down_1 = new HiveEngine::TriangleDescriptor(m, TI(ldf), TI(rdf), TI(rdc), 0, NO_PARENT);
+        auto down_2 = new HiveEngine::TriangleDescriptor(m, TI(rdc), TI(ldc), TI(ldf), 0, NO_PARENT);
+        down_1->set_neighbor(down_2, LR);
+
+        auto right_1 = new HiveEngine::TriangleDescriptor(m, TI(rdf), TI(ruf), TI(ruc), 0, NO_PARENT);
+        auto right_2 = new HiveEngine::TriangleDescriptor(m, TI(ruc), TI(rdc), TI(rdf), 0, NO_PARENT);
+        right_1->set_neighbor(right_2, LR);
+
+        auto close_1 = new HiveEngine::TriangleDescriptor(m, TI(ldc), TI(luc), TI(ruc), 0, NO_PARENT);
+        auto close_2 = new HiveEngine::TriangleDescriptor(m, TI(ruc), TI(rdc), TI(ldc), 0, NO_PARENT);
+        close_1->set_neighbor(close_2, LR);
+
+        auto far_1 = new HiveEngine::TriangleDescriptor(m, TI(ldf), TI(luf), TI(ruf), 0, NO_PARENT);
+        auto far_2 = new HiveEngine::TriangleDescriptor(m, TI(ruf), TI(rdf), TI(ldf), 0, NO_PARENT);
+        far_1->set_neighbor(far_2, LR);
+
     }
 
 }

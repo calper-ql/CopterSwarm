@@ -19,6 +19,7 @@ namespace CopterLib {
 
     void Copter::set_energy_source(EnergySource *energy_source) {
         this->energy_source = energy_source;
+        add_child(energy_source);
     }
 
     HiveEngine::EntityStepOutput Copter::step(unsigned steps_per_second) {

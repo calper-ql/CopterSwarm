@@ -14,10 +14,10 @@ add_executable(test_v1 test_v1.cc)
 target_link_libraries(test_v1 HiveEngine CopterLib)
 
 if(MINGW)
-    add_executable(environment_server win32_environment_server.cc)
+    add_executable(environment_server win32_env_server.cc)
     target_link_libraries(environment_server HiveEngine CopterLib)
 
-    add_executable(environment_server_test_client win32_environment_server_test_client.cc)
+    add_executable(environment_server_test_client win32_env_server_test_client.cc)
     target_link_libraries(environment_server_test_client HiveEngine CopterLib)
 
     target_link_libraries(environment_server ws2_32 mswsock advapi32)

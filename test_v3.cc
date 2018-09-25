@@ -65,9 +65,9 @@ int main(int argc, char* argv[]){
     HiveEngineRenderer::TextRenderer consolas("GL_CODE/consolas");
     consolas.init();
 
-    auto e = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 2.0), 0.1, 200.0);
+    auto e = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 15.0), 0.1, 200.0);
     auto e2 = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 0.8), 0.1, 10.0);
-    auto e4 = new HiveEngine::Entity(glm::vec3(-0.8, 0.0, 0.0), 0.1, 1.0);
+    auto e4 = new HiveEngine::Entity(glm::vec3(-0.8, 0.0, 0.0), 0.1, 50.0);
     e->add_child(e2);
     e2->add_child(e4);
     e2->set_torque_resistance({0, 0, 0}); // I know its weird but it works...
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]){
         auto view = camera.get_view();
         camera.get_user_input(window, false);
 
-        view = glm::translate(view, -e->get_position());
+        //view = glm::translate(view, -e->get_position());
         if(e->get_position().x < -80) e->set_position(glm::vec3(80.0, 0.0, 0.3));
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]){
                                  text_scale,
                                  text_scale*camera_perspective_ratio);
 
-        auto e_out = e->step(30);
+        auto e_out = e->step(3000);
 
         std::vector<glm::vec3> local_lines;
         std::vector<glm::vec3> local_line_colors;
@@ -158,7 +158,7 @@ int main(int argc, char* argv[]){
         }
 
         for (const auto &fragment : fragments) {
-            fragment->step(30);
+
             auto line_pair = HiveEngine::generate_entity_line_description(fragment, glm::vec3(1.0, 1.0, 1.0));
             ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
         }
@@ -169,6 +169,8 @@ int main(int argc, char* argv[]){
         auto line_pair = HiveEngine::generate_target_line_description(mass_center, 0.1, glm::vec3(1.0, 1.0, 1.0), glm::vec3(1.0, 0.0, 0.0));
         ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
 
+        line_pair = HiveEngine::generate_target_line_description(e_out.central_mass+e->calculate_position(), 0.1, glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 1.0, 0.0));
+        ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

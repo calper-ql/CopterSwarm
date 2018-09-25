@@ -19,18 +19,23 @@
 #include <stdio.h>
 
 #include <iostream>
+#include <thread>
 
 #include "CopterLib/Environment.h"
 #include <vector>
 
 #define DEFAULT_PORT "30000"
 
-int serve(SOCKET ClientSocket);
+void serve(SOCKET ClientSocket);
 
-int __cdecl main(int argc, char* argv[]){
+int __cdecl main(int argc, char** argv){
     std::cout << "-- START --" << std::endl;
 
     WSADATA wsaData;
+
+    auto c = CopterLib::Copter({1, 3, 2}, 32, 45); // if you disable this line it does not compile wtf...
+    //CopterLib::Environment env;
+    //env.command(c.serialize());
 
     int iResult;
 
@@ -91,7 +96,7 @@ int __cdecl main(int argc, char* argv[]){
     ClientSocket = INVALID_SOCKET;
 
 
-    for (int i = 0; i < 10; ++i) {
+    while (true) {
         // Accept a client socket
         ClientSocket = accept(ListenSocket, NULL, NULL);
 
@@ -99,17 +104,22 @@ int __cdecl main(int argc, char* argv[]){
             printf("accept failed: %d\n", WSAGetLastError());
             closesocket(ListenSocket);
             WSACleanup();
-            return 1;
+        } else {
+            std::thread session(&serve, ClientSocket);
+            session.detach();
         }
     }
 
+    closesocket(ListenSocket);
+    WSACleanup();
 
     std::cout << "--  END  --" << std::endl;
     return 0;
 }
 
 
-int serve(SOCKET ClientSocket){
+
+void serve(SOCKET ClientSocket){
     // Receive until the peer shuts down the connection
     CopterLib::Environment env;
     do {
@@ -117,51 +127,39 @@ int serve(SOCKET ClientSocket){
         int iResult, iSendResult;
 
         iResult = recv(ClientSocket, header_buf, sizeof(unsigned), 0);
-        if (iResult != sizeof(unsigned)) {
-            printf("Bytes received: %d\n", iResult);
+        if (iResult == sizeof(unsigned)) {
             unsigned size = *(unsigned*)header_buf;
             char data_buf[size];
             iResult = recv(ClientSocket, data_buf, size, 0);
             if(iResult == size){
-                /*
+
                 std::vector<char> vec_form(data_buf, data_buf+size);
                 auto res = env.command(vec_form);
                 // Echo the result back to the sender
                 auto reply_size = (unsigned)res.size();
+
                 iSendResult = send(ClientSocket, (char*)&reply_size, sizeof(unsigned), 0);
                 if (iSendResult == SOCKET_ERROR) {
-                    printf("send failed: %d\n", WSAGetLastError());
                     closesocket(ClientSocket);
-                    WSACleanup();
-                    return 1;
+                    break;
                 }
+
                 iSendResult = send(ClientSocket, res.data(), (unsigned)res.size(), 0);
                 if (iSendResult == SOCKET_ERROR) {
-                    printf("send failed: %d\n", WSAGetLastError());
                     closesocket(ClientSocket);
-                    WSACleanup();
-                    return 1;
+                    break;
                 }
-                 */
 
             } else {
-                printf("read failed: %d\n", WSAGetLastError());
                 closesocket(ClientSocket);
-                WSACleanup();
-                return 1;
+                break;
             }
 
-            printf("Bytes sent: %d\n", iSendResult);
-
-        } else if (iResult == 0)
-            printf("Connection closing...\n");
-        else {
-            printf("recv failed: %d\n", WSAGetLastError());
+        } else {
             closesocket(ClientSocket);
-            WSACleanup();
-            return 1;
+            break;
         }
 
     } while (true);
+    printf("Finishing thread\n");
 }
-
