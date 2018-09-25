@@ -105,6 +105,8 @@ namespace HiveEngine {
         EntityStepOutput eso;
         eso.moment_of_inertia = moment_of_inertia;
         eso.mass = mass;
+        CentralMass mc;
+
 
         for (auto child: children) {
             auto cso = child->step(steps_per_second);
@@ -123,7 +125,11 @@ namespace HiveEngine {
 
         for(auto f: this->applied_forces){
             glm::vec3 force_vector = f.force;
-            glm::vec3 leverage = this->rotation_matrix * f.leverage;
+            glm::vec3 leverage;
+            if(parent == nullptr) {
+                mc = calculate_central_mass();
+                leverage = this->rotation_matrix * (-mc.position+f.leverage);
+            } else leverage = this->rotation_matrix * f.leverage;
             if(f.is_relative){
                 force_vector = this->rotation_matrix * f.force;
             }
@@ -152,22 +158,12 @@ namespace HiveEngine {
             parent->apply_force(position, eso.force, true);
             rotation_matrix = rotation_matrix * angular_velocity;
         } else {
-            auto mc = calculate_central_mass();
-            velocity += (eso.force / eso.mass);
-            position += deamplify_ratio * velocity;
+
             rotation_matrix = rotation_matrix * angular_velocity;
 
-            glm::vec3 leverage = -mc.position;
-            glm::vec3 shift_vector = glm::cross(leverage, eso.force) / eso.moment_of_inertia;
-
-            auto angular_shift = glm::mat3(1.0f);
-            //angular_shift *= generate_rotation_matrix('x', shift_vector[0]);
-            //angular_shift *= generate_rotation_matrix('y', shift_vector[1]);
-            //angular_shift *= generate_rotation_matrix('z', shift_vector[2]);
-            angular_shift *= angular_velocity;
-
-            auto shift = (angular_shift * -mc.position) + mc.position;
-            position += shift;
+            velocity += (eso.force / mc.mass);
+            auto shift = (angular_velocity * -mc.position) + mc.position;
+            position += shift + deamplify_ratio * velocity;
             eso.central_mass = shift;
         }
 

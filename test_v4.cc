@@ -78,10 +78,10 @@ int main(int argc, char* argv[]){
     rear_rotor->set_rotation_matrix(HiveEngine::generate_rotation_matrix('z', PI/2.0));
     */
 
-    CopterLib::Copter* c = new CopterLib::Copter(glm::vec3(0.0, 0.0, 1000.0), 1.0, 0.2);
+    CopterLib::Copter* c = new CopterLib::Copter(glm::vec3(0.0, 0.0, 10.0), 1.0, 0.2);
     CopterLib::Motor* mlu = new CopterLib::Motor(300, 0.05, glm::vec3(-1.0, 1.0, 0.0), 0.1, 0.1);
     CopterLib::Motor* mll = new CopterLib::Motor(300, 0.05, glm::vec3(-1.0, -1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mru = new CopterLib::Motor(300, 0.05, glm::vec3(2.0, 1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mru = new CopterLib::Motor(300, 0.05, glm::vec3(1.0, 1.0, 0.0), 0.1, 0.1);
     CopterLib::Motor* mrl = new CopterLib::Motor(300, 0.05, glm::vec3(1.0, -1.0, 0.0), 0.1, 0.1);
 
 	/* 		Energy stored in battery is Charge(C) * Voltage(V) = Energy(J)
@@ -144,12 +144,12 @@ int main(int argc, char* argv[]){
 
 
     while (!glfwWindowShouldClose(window)) {
-        float step_val = 6000;
+        float step_val = 100;
         camera.set_perspective(90, camera_perspective_ratio, 0.01, 1e5);
         auto view = camera.get_view();
         camera.get_user_input(window, false);
 
-        view = glm::translate(view, -c->get_position());
+        //view = glm::translate(view, -c->get_position());
         if(c->calculate_position().z < 0.0) {
             c->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
             c->set_velocity(glm::vec3(0.0f, 0.0f, 0.0f));
