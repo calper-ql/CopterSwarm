@@ -12,8 +12,9 @@ namespace CopterLib {
 
     void Copter::add_actuator(std::pair<Motor *, Rotor *> actuator) {
         actuators.push_back(actuator);
-        //add_child(actuator.second);
+        add_child(actuator.second);
         add_child(actuator.first);
+        //actuator.second->set_position(actuator.first->get_position() + actuator.second->get_position());
         actuator.first->add_child(actuator.second);
     }
 
@@ -22,7 +23,7 @@ namespace CopterLib {
         add_child(energy_source);
     }
 
-    HiveEngine::EntityStepOutput Copter::step(unsigned steps_per_second) {
+    void Copter::step_motor(unsigned steps_per_second) {
         float deamplify_ratio = 1.0f / (float)steps_per_second;
         for(auto p: actuators){
             if(energy_source){
@@ -30,7 +31,11 @@ namespace CopterLib {
                 p.second->apply_force(sym_f.left.leverage, sym_f.left.force, sym_f.left.is_relative);
                 p.second->apply_force(sym_f.right.leverage, sym_f.right.force, sym_f.right.is_relative);
             }
+            p.second->step_rotor(steps_per_second);
         }
+    }
+
+    HiveEngine::EntityStepOutput Copter::step(unsigned steps_per_second) {
         return Entity::step(steps_per_second);
     }
 
@@ -49,5 +54,6 @@ namespace CopterLib {
         str = add_float_to_command(str, get_mass());
         return str;
     }
+
 
 }

@@ -78,11 +78,11 @@ int main(int argc, char* argv[]){
     rear_rotor->set_rotation_matrix(HiveEngine::generate_rotation_matrix('z', PI/2.0));
     */
 
-    CopterLib::Copter* c = new CopterLib::Copter(glm::vec3(0.0, 0.0, 10.0), 1.0, 0.2);
-    CopterLib::Motor* mlu = new CopterLib::Motor(300, 0.05, glm::vec3(-1.0, 1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mll = new CopterLib::Motor(300, 0.05, glm::vec3(-1.0, -1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mru = new CopterLib::Motor(300, 0.05, glm::vec3(1.0, 1.0, 0.0), 0.1, 0.1);
-    CopterLib::Motor* mrl = new CopterLib::Motor(300, 0.05, glm::vec3(1.0, -1.0, 0.0), 0.1, 0.1);
+    CopterLib::Copter* c = new CopterLib::Copter(glm::vec3(0.0, 0.0, 10.0), 1.0, 0.4);
+    CopterLib::Motor* mlu = new CopterLib::Motor(300.00, 0.05, glm::vec3(-1.0, 1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mll = new CopterLib::Motor(300.00, 0.05, glm::vec3(-1.0, -1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mru = new CopterLib::Motor(300.00, 0.05, glm::vec3(1.0, 1.0, 0.0), 0.1, 0.1);
+    CopterLib::Motor* mrl = new CopterLib::Motor(300.00, 0.05, glm::vec3(1.0, -1.0, 0.0), 0.1, 0.1);
 
 	/* 		Energy stored in battery is Charge(C) * Voltage(V) = Energy(J)
 	 *		Also Current(A) * time(seconds) = Charge(C)
@@ -97,11 +97,10 @@ int main(int argc, char* argv[]){
     CopterLib::EnergySource* es = new CopterLib::EnergySource(3600.0f*12.0f*3.6f, 3600.0f*12.0f*3.6f, glm::vec3(0.0, 0.0, 0.1), 0.1, 0.1);
 
     c->set_energy_source(es);
-
-    CopterLib::Rotor* rlu = new CopterLib::Rotor(4.0f, 0.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
-    CopterLib::Rotor* rll = new CopterLib::Rotor(4.0f, 0.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
-    CopterLib::Rotor* rru = new CopterLib::Rotor(4.0f, 0.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
-    CopterLib::Rotor* rrl = new CopterLib::Rotor(4.0f, 0.09f * 1.225f * 1.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
+    CopterLib::Rotor* rlu = new CopterLib::Rotor(0.04f, 0.09f * 1.225f * 10.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
+    CopterLib::Rotor* rll = new CopterLib::Rotor(0.04f, 0.09f * 1.225f * 10.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
+    CopterLib::Rotor* rru = new CopterLib::Rotor(0.04f, 0.09f * 1.225f * 10.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
+    CopterLib::Rotor* rrl = new CopterLib::Rotor(0.04f, 0.09f * 1.225f * 10.0f, true, glm::vec3(0.0, 0.0, 0.1), 0.2, 0.1);
 
     c->add_actuator({mlu, rlu});
     c->add_actuator({mll, rll});
@@ -128,6 +127,7 @@ int main(int argc, char* argv[]){
 
     //c->set_throttle({-0.0, -0.0, 0.01, 0.0});
 
+    /*
     CopterLib::Environment env;
     env.command(c->serialize());
     env.command(es->serialize());
@@ -141,15 +141,18 @@ int main(int argc, char* argv[]){
     env.command(rll->serialize());
     env.command(rru->serialize());
     env.command(rrl->serialize());
+     */
 
 
     while (!glfwWindowShouldClose(window)) {
-        float step_val = 100;
+        float step_val = 60;
         camera.set_perspective(90, camera_perspective_ratio, 0.01, 1e5);
         auto view = camera.get_view();
         camera.get_user_input(window, false);
 
-        //view = glm::translate(view, -c->get_position());
+        //view = view / glm::mat4(c->calculate_rotation_matrix());
+        view = glm::translate(view, -c->get_position());
+
         if(c->calculate_position().z < 0.0) {
             c->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
             c->set_velocity(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -173,6 +176,8 @@ int main(int argc, char* argv[]){
                                  -1.0f, char_d,
                                  text_scale,
                                  text_scale*camera_perspective_ratio);
+
+
         char_d = consolas.render("BATT: " + std::to_string(es->get_available_energy()) + "/" +std::to_string(es->get_capacity()),
                                  -1.0f, char_d,
                                  text_scale,
@@ -190,26 +195,28 @@ int main(int argc, char* argv[]){
         float pow = 0.0;
 
         if(glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
-            pow = 0.99;
+            pow = 0.97;
         }
+
         if(glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
-            fov_mod = 0.03;
+            fov_mod = -0.03f;
         }
 
         if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
-            bck_mod = 0.03;
+            bck_mod = -0.03f;
         }
 		
 	  	if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
-            left_mod = 0.03;
+            left_mod = 0.03f;
         }
 
         if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
-            right_mod = 0.03;
+            right_mod = 0.03f;
         }
 
 
         c->set_throttle({-pow+fov_mod, pow+left_mod, -pow+bck_mod, pow+right_mod});
+        c->step_motor(step_val);
 
         for (auto fragment : fragments) {
             auto line_pair = HiveEngine::generate_entity_line_description(fragment, glm::vec3(1.0, 1.0, 0.1));
@@ -218,13 +225,25 @@ int main(int argc, char* argv[]){
 
         std::vector<glm::vec3> local_lines;
         std::vector<glm::vec3> local_line_colors;
-        glm::vec3 relative_point(0.0, 0.1, 0.0);
-        auto throw_acc = rrl->calculate_throw_vector(relative_point, true)/step_val + rrl->get_velocity() * 2.0 / 60.0;
-        auto global_point = rrl->calculate_position() + rrl->calculate_rotation_matrix() * relative_point;
-        local_lines.emplace_back(global_point);
-        local_lines.emplace_back(global_point +  throw_acc);
-        local_line_colors.emplace_back(1.0, 1.0, 1.0);
-        local_line_colors.emplace_back(1.0, 0.0, 0.0);
+
+        for (auto fragment : fragments) {
+            auto all_f = fragment->get_applied_forces();
+            for (auto f : all_f) {
+                auto p = fragment->calculate_position();
+                auto lev = f.leverage;
+                auto vec = f.force * step_val/1.0;
+                if (f.is_relative){
+                    auto rot = fragment->calculate_rotation_matrix();
+                    lev = rot * lev;
+                    vec = rot * vec;
+                }
+                local_lines.emplace_back(p + lev);
+                local_lines.emplace_back(p + lev + vec);
+                local_line_colors.emplace_back(1.0, 1.0, 1.0);
+                local_line_colors.emplace_back(1.0, 0.0, 0.0);
+            }
+        }
+
         ld->draw(local_lines.data(), local_line_colors.data(), local_lines.size() / 2, view);
 
         auto central_mass = c->calculate_central_mass();

@@ -19,6 +19,7 @@ namespace HiveEngine {
         this->moment_of_inertia = glm::mat3(2.0f/5.0f * mass * radius * radius);
         this->calculated_moment_of_inertia = this->moment_of_inertia;
         this->torque_resistance = glm::vec3(1.0f, 1.0f, 1.0f);
+        this->angular_velocity = glm::mat3(1.0);
     }
 
     Entity::~Entity() {
@@ -106,61 +107,68 @@ namespace HiveEngine {
         eso.moment_of_inertia = moment_of_inertia;
         eso.mass = mass;
         CentralMass mc;
-
+        if(parent == nullptr) {
+            mc = calculate_central_mass();
+        }
 
         for (auto child: children) {
             auto cso = child->step(steps_per_second);
             eso.torque += cso.torque;
-            auto s_vec = rotation_matrix * child->position * child->mass;
             eso.mass += cso.mass;
-
             glm::mat3 child_moi = glm::mat3(1.0);
-            auto c_pos = child->get_position();
-            c_pos *= c_pos;
+            auto c_pos = child->get_position(); c_pos *= c_pos;
             child_moi[0][0] = child->mass * (c_pos.y + c_pos.z);
             child_moi[1][1] = child->mass * (c_pos.x + c_pos.z);
             child_moi[2][2] = child->mass * (c_pos.x + c_pos.y);
             eso.moment_of_inertia += child_moi + cso.moment_of_inertia;
         }
 
+        if(parent == nullptr) {
+            glm::mat3 child_moi = glm::mat3(1.0);
+            auto c_pos = -mc.position; c_pos *= c_pos;
+            child_moi[0][0] = mass * (c_pos.y + c_pos.z);
+            child_moi[1][1] = mass * (c_pos.x + c_pos.z);
+            child_moi[2][2] = mass * (c_pos.x + c_pos.y);
+            eso.moment_of_inertia = child_moi + eso.moment_of_inertia;
+        }
+
+        //eso.moment_of_inertia = glm::mat3(2.0f/5.0f * eso.mass * 10 * radius * radius);
+
+        glm::vec3 dt = {0.0f, 0.0f, 0.0f};
         for(auto f: this->applied_forces){
             glm::vec3 force_vector = f.force;
             glm::vec3 leverage;
-            if(parent == nullptr) {
-                mc = calculate_central_mass();
-                leverage = this->rotation_matrix * (-mc.position+f.leverage);
-            } else leverage = this->rotation_matrix * f.leverage;
+
+            if(parent == nullptr) leverage = this->rotation_matrix * (-mc.position+f.leverage);
+            else leverage = this->rotation_matrix * f.leverage;
+
             if(f.is_relative){
-                force_vector = this->rotation_matrix * f.force;
+                force_vector = this->rotation_matrix * force_vector;
             }
+
             glm::vec3 torque_vector = glm::cross(leverage, force_vector);
             eso.force += force_vector;
-            eso.torque += torque_vector;
+
+            if(parent) eso.torque += torque_vector * glm::abs(torque_resistance - 1.0f) * deamplify_ratio;
+            else eso.torque += torque_vector * deamplify_ratio;
+
+            if(parent) parent->apply_force(position, force_vector, f.is_relative);
         }
 
-        if(parent){
-            total_torque_counter += eso.torque * glm::abs(torque_resistance - 1.0f);
-        } else {
-            total_torque_counter += eso.torque;
-        }
+        total_torque_counter += eso.torque;
 
-        auto total_w = total_torque_counter / eso.moment_of_inertia * deamplify_ratio;
+        auto total_w = total_torque_counter / eso.moment_of_inertia;
         calculated_moment_of_inertia = eso.moment_of_inertia;
 
-        auto angular_velocity = glm::mat3(1.0f);
+        angular_velocity = glm::mat3(1.0f);
         angular_velocity *= generate_rotation_matrix('x', total_w[0]);
         angular_velocity *= generate_rotation_matrix('y', total_w[1]);
         angular_velocity *= generate_rotation_matrix('z', total_w[2]);
 
         last_eso = eso;
 
-        if(parent) {
-            parent->apply_force(position, eso.force, true);
-            rotation_matrix = rotation_matrix * angular_velocity;
-        } else {
-
-            rotation_matrix = rotation_matrix * angular_velocity;
-
+        rotation_matrix = rotation_matrix * angular_velocity;
+        if(parent == nullptr) {
             velocity += (eso.force / mc.mass);
             auto shift = (angular_velocity * -mc.position) + mc.position;
             position += shift + deamplify_ratio * velocity;
@@ -201,7 +209,7 @@ namespace HiveEngine {
 
     glm::vec3 Entity::calculate_relative_position() {
         if(parent == nullptr) return glm::vec3(0.0f, 0.0f, 0.0f);
-        return parent->calculate_relative_position() + parent->rotation_matrix * position;
+        return parent->calculate_relative_position() + parent->calculate_rotation_matrix() * position;
     }
 
     glm::vec3 Entity::calculate_position() {

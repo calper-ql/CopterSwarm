@@ -19,9 +19,15 @@ namespace CopterLib {
 
     public:
         Copter(glm::vec3 pos, float radius, float mass);
+
         void add_actuator(std::pair<Motor*, Rotor*> actuator);
+
         void set_energy_source(EnergySource* energy_source);
+
+        virtual void step_motor(unsigned steps_per_second);
+
         virtual HiveEngine::EntityStepOutput step(unsigned steps_per_second);
+
         bool set_throttle(std::vector<float> values);
 
         std::vector<char> serialize() override;

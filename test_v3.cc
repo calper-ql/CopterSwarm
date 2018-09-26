@@ -65,36 +65,55 @@ int main(int argc, char* argv[]){
     HiveEngineRenderer::TextRenderer consolas("GL_CODE/consolas");
     consolas.init();
 
-    auto e = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 15.0), 0.1, 200.0);
-    auto e2 = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 0.8), 0.1, 10.0);
-    auto e4 = new HiveEngine::Entity(glm::vec3(-0.8, 0.0, 0.0), 0.1, 50.0);
-    e->add_child(e2);
-    e2->add_child(e4);
-    e2->set_torque_resistance({0, 0, 0}); // I know its weird but it works...
-
-    e->apply_force(e->get_position() + glm::vec3(0.0, 0.0, e->get_radius()), glm::vec3(0.0, 8, 0.0), true);
-    e->apply_force(e->get_position() + glm::vec3(0.0, 0.0, -e->get_radius()), glm::vec3(0.0, -8, 0.0), true);
-
-    e2->apply_force(glm::vec3(0.0, 0.0, 0.0), glm::vec3(5, 0, 0), true);
-    e->apply_force(glm::vec3(0.0, 0.0, 0.0), glm::vec3(-5, 0, 0), true);
+    auto e = new HiveEngine::Entity(glm::vec3(0.0, 0.0, 0.0), 0.2, 0.1);
+    auto el = new HiveEngine::Entity(glm::vec3(-0.8, 0.0, 0.0), 0.01, 0.1);
+    auto el2 = new HiveEngine::Entity(glm::vec3(-0.8, 0.0, 0.0), 0.01, 0.1);
+    auto er = new HiveEngine::Entity(glm::vec3(0.8, 0.0, 0.0), 0.05, 0.1);
+    auto ef = new HiveEngine::Entity(glm::vec3(0.0, 0.8, 0.0), 0.01, 0.1);
+    auto eb = new HiveEngine::Entity(glm::vec3(0.0, -0.8, 0.0), 0.05, 0.1);
+    e->add_child(el);
+    e->add_child(er);
+    //el->add_child(el2);
+    e->add_child(ef);
+    e->add_child(eb);
+    //e2->set_torque_resistance({0, 0, 0}); // I know its weird but it works...
 
     std::vector<HiveEngine::Entity*> fragments;
     bool fragment_key_state = false;
 
     fragments.push_back(e);
-    fragments.push_back(e2);
-    fragments.push_back(e4);
+    fragments.push_back(el);
+    fragments.push_back(er);
+    fragments.push_back(el2);
+    fragments.push_back(eb);
+    fragments.push_back(ef);
 
     while (!glfwWindowShouldClose(window)) {
-
-        //e4->apply_force(glm::vec3(0.0, 0.0, 0.0), glm::vec3(-0.01, 0.0, 0.0), false);
+        float step_val = 600;
 
         camera.set_perspective(90, camera_perspective_ratio, 0.01, 1e5);
         auto view = camera.get_view();
         camera.get_user_input(window, false);
 
-        //view = glm::translate(view, -e->get_position());
-        if(e->get_position().x < -80) e->set_position(glm::vec3(80.0, 0.0, 0.3));
+        //view = view / glm::mat4(e->calculate_rotation_matrix());
+        view = glm::translate(view, -e->get_position());
+
+        if(e->calculate_position().z < 0.0) {
+            e->set_position(glm::vec3(0.0f, 0.0f, 0.0f));
+            e->set_velocity(glm::vec3(0.0f, 0.0f, 0.0f));
+            for (const auto &fragment : fragments) {
+                fragment->apply_force(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 9.8f/step_val * fragment->get_mass()), false);
+
+            }
+            //e->apply_force(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 9.8f/step_val * e->calculate_total_mass()), false);
+        }
+
+
+        for (const auto &fragment : fragments) {
+            fragment->apply_force(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -9.8f/step_val * fragment->get_mass()), false);
+        }
+        //e->apply_force(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -9.8f/step_val * e->calculate_total_mass()), false);
+
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -111,57 +130,54 @@ int main(int argc, char* argv[]){
                                  text_scale,
                                  text_scale*camera_perspective_ratio);
 
-        auto e_out = e->step(3000);
+        if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
+            el->apply_force({0,0,0}, {0.0, 0.0, 10.0/step_val}, true);
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
+            er->apply_force({0,0,0}, {0.0, 0.0, 10.0/step_val}, true);
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
+            ef->apply_force({0,0,0}, {0.0, 0.0, 10.0/step_val}, true);
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
+            eb->apply_force({0,0,0}, {0.0, 0.0, 10.0/step_val}, true);
+        }
+
+
+        if(glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS){
+            el2->apply_force({0,0,0}, {0.0, 0.0, 10.0/step_val}, true);
+        }
+
+        for (const auto &fragment : fragments) {
+            auto line_pair = HiveEngine::generate_entity_line_description(fragment, glm::vec3(1.0, 1.0, 1.0));
+            ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
+        }
 
         std::vector<glm::vec3> local_lines;
         std::vector<glm::vec3> local_line_colors;
 
-        glm::vec3 relative_point(0.0, 0.0, 0.1);
-        auto throw_acc = e2->calculate_throw_vector(relative_point, true) + e2->get_velocity() * 2.0;
-        auto global_point = e2->calculate_position() + e2->calculate_rotation_matrix() * relative_point;
-        local_lines.emplace_back(global_point);
-        local_lines.emplace_back(global_point +  throw_acc);
-        local_line_colors.emplace_back(1.0, 1.0, 1.0);
-        local_line_colors.emplace_back(1.0, 0.0, 0.0);
-        ld->draw(local_lines.data(), local_line_colors.data(), local_lines.size() / 2, view);
-
-        char_d = consolas.render("tot acc: " + std::to_string(glm::length(throw_acc)),
-                                 -1.0f, char_d,
-                                 text_scale,
-                                 text_scale*camera_perspective_ratio);
-
-        if(glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS){
-            if(!fragment_key_state){
-                fragment_key_state = true;
-                auto frag = new HiveEngine::Entity(global_point, 0.01, 0.01);
-                frag->set_velocity(throw_acc);
-                fragments.push_back(frag);
+        for (auto fragment : fragments) {
+            auto all_f = fragment->get_applied_forces();
+            for (auto f : all_f) {
+                auto p = fragment->calculate_position();
+                auto lev = f.leverage;
+                auto vec = f.force * step_val/10.0;
+                if (f.is_relative){
+                    auto rot = fragment->calculate_rotation_matrix();
+                    lev = rot * lev;
+                    vec = rot * vec;
+                }
+                local_lines.emplace_back(p + lev);
+                local_lines.emplace_back(p + lev + vec);
+                local_line_colors.emplace_back(1.0, 1.0, 1.0);
+                local_line_colors.emplace_back(1.0, 0.0, 0.0);
             }
-        } else {
-            fragment_key_state = false;
         }
 
-        if(glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
-            e2->set_position(glm::vec3(0.0, 0.0, 0.8));
-        }
-
-        if(glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS){
-            e2->set_position(glm::vec3(0.0, 0.0, 0.4));
-        }
-
-        if(glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS){
-            //e3->set_position(glm::vec3(0.0, 0.0, -0.8));
-        }
-
-        if(glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
-            //e3->set_position(glm::vec3(0.0, 0.0, -0.4));
-        }
-
-        for (const auto &fragment : fragments) {
-
-            auto line_pair = HiveEngine::generate_entity_line_description(fragment, glm::vec3(1.0, 1.0, 1.0));
-            ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
-        }
+        ld->draw(local_lines.data(), local_line_colors.data(), local_lines.size() / 2, view);
 
         auto central_mass = e->calculate_central_mass();
         auto mass_center = e->calculate_position() + central_mass.position;
@@ -169,8 +185,7 @@ int main(int argc, char* argv[]){
         auto line_pair = HiveEngine::generate_target_line_description(mass_center, 0.1, glm::vec3(1.0, 1.0, 1.0), glm::vec3(1.0, 0.0, 0.0));
         ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
 
-        line_pair = HiveEngine::generate_target_line_description(e_out.central_mass+e->calculate_position(), 0.1, glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0, 1.0, 0.0));
-        ld->draw(line_pair.first.data(), line_pair.second.data(), line_pair.first.size() / 2, view);
+        auto e_out = e->step(step_val);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

@@ -21,6 +21,7 @@ namespace HiveEngine {
 
         glm::mat3 rotation_matrix; // expressed in radians
         glm::vec3 total_torque_counter; // expressed inn radians
+        glm::mat3 angular_velocity;
         glm::mat3 moment_of_inertia;
         glm::vec3 torque_resistance;
 

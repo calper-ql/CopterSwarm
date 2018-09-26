@@ -15,18 +15,16 @@ namespace CopterLib {
         this->closed_rotor = closed_rotor;
     }
 
-
-    HiveEngine::EntityStepOutput Rotor::step(unsigned steps_per_second){
-        float deamplify_ratio = 1.0f / (float)steps_per_second;
-        auto cm = get_rotation_matrix();
+    void Rotor::step_rotor(unsigned steps_per_second) {
+        //float deamplify_ratio = 1.0f / (float)steps_per_second;
         auto right_leverage = glm::vec3(get_radius() / 2.0f, 0.0f, 0.0f);
         auto left_leverage = glm::vec3(-get_radius() / 2.0f, 0.0f, 0.0f);
 
         auto throw_vec_right = this->calculate_throw_vector(right_leverage, !this->closed_rotor);
         auto throw_vec_left = this->calculate_throw_vector(left_leverage, !this->closed_rotor);
 
-        throw_vec_left *= deamplify_ratio;
-        throw_vec_right *= deamplify_ratio;
+        //throw_vec_left *= deamplify_ratio;
+        //throw_vec_right *= deamplify_ratio;
 
         auto right_magnitude = glm::length(throw_vec_right);
         right_magnitude *= right_magnitude;
@@ -40,8 +38,11 @@ namespace CopterLib {
 
         this->apply_force(right_leverage, glm::normalize(-throw_vec_right) * right_magnitude, true);
         this->apply_force(left_leverage, glm::normalize(-throw_vec_left) * left_magnitude, true);
-        this->apply_force(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 0.0, 1.0 * (ld_ratio * (right_magnitude+left_magnitude) * deamplify_ratio)), true); // up force
+        this->apply_force(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 0.0, 1.0 * (ld_ratio * (right_magnitude+left_magnitude))), true); // up force
 
+    }
+
+    HiveEngine::EntityStepOutput Rotor::step(unsigned steps_per_second){
         return Entity::step(steps_per_second);
     }
 
@@ -55,5 +56,7 @@ namespace CopterLib {
         str = add_float_to_command(str, get_mass());
         return str;
     }
+
+
 
 }

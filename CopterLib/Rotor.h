@@ -17,7 +17,10 @@ namespace CopterLib {
     public:
         Rotor(float ld_ratio, float drag_constant, bool closed_rotor, glm::vec3 pos, float radius, float mass);
 
+        void step_rotor(unsigned steps_per_second);
+
         HiveEngine::EntityStepOutput step(unsigned steps_per_second) override;
+
         std::vector<char> serialize() override;
     };
 }
